@@ -1,110 +1,141 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Smile — Máquina de Prospecção</title>
 <style>
-  :root{--verde:#1f4d3f;--verde2:#2c6b56;--terra:#c8663f;--terra2:#e07a4d;--bg:#0e1a16;--card:#15251f;--txt:#eaf2ee;--mut:#8fb0a2}
+  :root{--verde:#1f4d3f;--verde2:#2c6b56;--terra:#c8663f;--terra2:#e88a5a;--bg:#0d1714;--card:#16241f;--card2:#1b2e27;--txt:#eef5f1;--mut:#8fb0a2;--linha:#263d33}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--txt);font:15px/1.45 -apple-system,system-ui,sans-serif;padding:14px;max-width:920px;margin:0 auto}
-  h1{font-size:19px;color:var(--terra2)} .mut{color:var(--mut)}
-  .row{display:flex;gap:10px;flex-wrap:wrap} .row>*{flex:1}
-  .card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;border:1px solid #23392f}
-  .big{font-size:40px;font-weight:800;color:var(--terra2);line-height:1}
-  .funil{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
-  .fstep{min-width:96px;background:#12211b;border-radius:10px;padding:10px;text-align:center;border:1px solid #23392f}
-  .fstep b{font-size:22px;display:block;color:var(--txt)} .fstep span{font-size:11px;color:var(--mut)}
-  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
-  .boa{background:#1c3b2e;color:#7fe0a8} .atencao{background:#4a3a1a;color:#f0c674} .ruim{background:#4a1f1a;color:#f08a7a}
-  button{background:var(--verde2);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .kill{background:var(--terra)} .aprovar{background:#2c6b56;width:100%;padding:12px}
-  .conv{padding:10px;border-bottom:1px solid #23392f;cursor:pointer} .conv:hover{background:#1a2c24}
-  .conv b{color:var(--terra2)} .lead{font-size:12px;color:var(--mut)}
-  input[type=password],input[type=number]{background:#0e1a16;border:1px solid #23392f;color:#fff;border-radius:8px;padding:8px;width:100%}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:9}
-  .modal .inner{background:var(--card);border-radius:16px 16px 0 0;padding:16px;max-width:920px;width:100%;max-height:80vh;overflow:auto}
-  .bolha{max-width:80%;padding:8px 12px;border-radius:12px;margin:6px 0;white-space:pre-wrap}
-  .claudio{background:var(--verde2);margin-right:auto} .lead2{background:#2a2018;margin-left:auto}
+  body{background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,system-ui,sans-serif;padding:16px;max-width:960px;margin:0 auto}
+  h1{font-size:20px;color:var(--terra2);display:flex;align-items:center;gap:8px}
+  .mut{color:var(--mut);font-size:13px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+  .card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--linha)}
+  .hero{background:linear-gradient(135deg,#1b3a30,#16241f);text-align:center;padding:22px}
+  .big{font-size:52px;font-weight:800;color:var(--terra2);line-height:1;margin:6px 0}
+  .label{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--mut)}
+  .metabox{display:flex;gap:14px;align-items:center}
+  .metanum{font-size:30px;font-weight:800;color:#7fe0a8}
+  .funil{display:flex;gap:8px;align-items:stretch}
+  .fstep{flex:1;background:var(--card2);border-radius:12px;padding:12px 8px;text-align:center;position:relative}
+  .fstep b{font-size:26px;display:block} .fstep span{font-size:11px;color:var(--mut)}
+  .fstep .pct{font-size:10px;color:var(--terra2);font-weight:700}
+  .arrow{align-self:center;color:var(--mut);font-size:14px}
+  @media(max-width:640px){.funil{flex-wrap:wrap}.fstep{min-width:28%}.arrow{display:none}}
+  .pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700}
+  .boa{background:#1c3b2e;color:#7fe0a8}.atencao{background:#4a3a1a;color:#f0c674}.ruim{background:#4a1f1a;color:#f08a7a}
+  .star{color:#f0c674;font-weight:700}
+  button{background:var(--verde2);color:#fff;border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;font-size:14px}
+  .kill{background:var(--terra)}.aprovar{background:#2c6b56;width:100%;padding:14px;font-size:15px}
+  .conv{padding:12px;border-bottom:1px solid var(--linha);cursor:pointer;border-radius:8px}.conv:active{background:#1e332b}
+  .conv .nm{color:var(--terra2);font-weight:700}.conv .meta{font-size:12px;color:var(--mut)}.conv .last{font-size:13px;color:#c5d8cf;margin-top:3px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.dg{background:#7fe0a8}.do{background:#f0c674}
+  input[type=password],input[type=number]{background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:11px;width:100%;font-size:15px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:9}
+  .modal .inner{background:var(--card);border-radius:18px 18px 0 0;padding:18px;max-width:960px;width:100%;max-height:82vh;overflow:auto}
+  .bolha{max-width:82%;padding:9px 13px;border-radius:14px;margin:7px 0;white-space:pre-wrap;font-size:14px}
+  .claudio{background:var(--verde2)}.lead2{background:#33261c;margin-left:auto}
   .hide{display:none}
+  h2{font-size:14px;color:var(--mut);margin-bottom:10px;font-weight:600}
 </style>
 
-<div id="login">
+<div id="login" class="card" style="max-width:400px;margin:60px auto">
   <h1>🦷 Smile — Prospecção</h1>
-  <p class="mut" style="margin:8px 0">A máquina de outbound. Entra com a senha.</p>
+  <p class="mut" style="margin:10px 0">Entra com a senha.</p>
   <input id="senha" type="password" placeholder="senha" autocomplete="current-password">
-  <button onclick="entrar()" style="margin-top:10px;width:100%">Entrar</button>
+  <button onclick="entrar()" style="margin-top:12px;width:100%">Entrar</button>
   <p id="err" style="color:var(--terra2);margin-top:8px"></p>
 </div>
 
-<div id="app" class="hide">
+<div id="app" class="hide grid">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h1>🦷 Máquina de Prospecção</h1>
     <button id="kill" class="kill" onclick="toggleAtivo()">…</button>
   </div>
 
-  <div class="row">
-    <div class="card" style="text-align:center">
-      <div class="mut">Reuniões agendadas</div>
+  <div class="grid g2">
+    <div class="card hero">
+      <div class="label">Reuniões agendadas</div>
       <div class="big" id="agendados">0</div>
+      <div class="mut">o que importa no fim</div>
     </div>
     <div class="card">
-      <div class="mut">Saúde do número</div>
-      <div style="margin:8px 0"><span id="saude" class="pill boa">…</span></div>
-      <div class="lead">falha <b id="tfalha">0</b>% · opt-out <b id="optouts">0</b> · hoje <b id="vhoje">0</b>/<b id="vteto">0</b></div>
+      <div class="label">Limite do WhatsApp (Meta)</div>
+      <div class="metabox" style="margin-top:10px">
+        <div><div class="metanum" id="metalimite">—</div><div class="mut">por 24h</div></div>
+        <div style="border-left:1px solid var(--linha);padding-left:14px">
+          <div class="mut">qualidade do número</div>
+          <div class="star" id="metaqual" style="font-size:18px">—</div>
+        </div>
+      </div>
+      <p class="mut" style="margin-top:10px">Você pode mandar muito. O teto abaixo é só a trava de segurança pra subir com cuidado.</p>
     </div>
   </div>
 
   <div class="card">
-    <div class="mut" style="margin-bottom:8px">Funil do dia</div>
+    <h2>Funil do dia</h2>
     <div class="funil" id="funil"></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h2>Saúde do número</h2>
+      <div><span id="saude" class="pill boa">…</span></div>
+      <div class="mut" style="margin-top:10px">falha de entrega <b id="tfalha">0</b>% · saíram <b id="opts">0</b> · opt-outs <b id="optouts">0</b></div>
+    </div>
+    <div class="card">
+      <h2>Volume de hoje</h2>
+      <div style="font-size:30px;font-weight:800"><span id="vhoje">0</span> <span class="mut" style="font-size:16px">/ <span id="vteto">0</span> (seu teto)</span></div>
+      <div class="grid" style="grid-template-columns:1fr auto;margin-top:10px;gap:8px;align-items:center">
+        <input type="number" id="teto" min="10" max="100000">
+        <button onclick="salvarTeto()">Salvar teto</button>
+      </div>
+    </div>
   </div>
 
   <div class="card" id="aprovacao"></div>
 
   <div class="card">
-    <div class="mut" style="margin-bottom:6px">Conversas ao vivo</div>
+    <h2>Conversas ao vivo</h2>
     <div id="conversas"></div>
-  </div>
-
-  <div class="card">
-    <div class="mut">Volume por dia (teto)</div>
-    <div class="row" style="margin-top:8px;align-items:center">
-      <input type="number" id="teto" min="10" max="1000" style="max-width:120px">
-      <button onclick="salvarTeto()" style="max-width:140px">Salvar teto</button>
-    </div>
-    <p class="lead" style="margin-top:6px">Comece devagar (50/dia) e suba conforme a saúde do número se mantém boa. WhatsApp premia quem manda com qualidade.</p>
   </div>
 </div>
 
 <div class="modal" id="modal"><div class="inner">
-  <div style="display:flex;justify-content:space-between"><b id="mnome">—</b><button onclick="fechar()" style="padding:4px 10px">fechar</button></div>
-  <div id="mmsgs" style="margin-top:10px"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center"><b id="mnome">—</b><button onclick="fechar()" style="padding:6px 12px;background:#33261c">fechar</button></div>
+  <div id="mmsgs" style="margin-top:12px"></div>
 </div></div>
 
 <script>
-var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api', SENHA='', ATIVO=false;
+var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SENHA='',ATIVO=false;
 function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-async function api(acao,corpo){var r=await fetch(API+'?acao='+acao,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(corpo||{})});return r.json()}
+async function api(a,c){var r=await fetch(API+'?acao='+a,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(c||{})});return r.json()}
 async function entrar(){SENHA=document.getElementById('senha').value;var r=await api('login');if(r.ok){localStorage.setItem('smile_s',SENHA);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}else document.getElementById('err').textContent='senha incorreta'}
-var FUNIL=[['disparados','disparados'],['entregues','entregues'],['lidos','lidos'],['responderam','responderam'],['conversando','conversando'],['agendados','agendados']];
+var F=[['disparados','disparados'],['entregues','entregues'],['lidos','lidos'],['responderam','responderam'],['conversando','conversando'],['agendados','agendados']];
 async function loop(){
-  var d=await api('outbound'); if(!d.ok)return;
-  document.getElementById('agendados').textContent=d.funil.agendados;
-  document.getElementById('funil').innerHTML=FUNIL.map(f=>'<div class="fstep"><b>'+d.funil[f[0]]+'</b><span>'+f[1]+'</span></div>').join('');
-  var s=d.saude; var el=document.getElementById('saude'); el.className='pill '+s.estado; el.textContent={boa:'✅ boa',atencao:'⚠️ atenção',ruim:'🔴 ruim'}[s.estado];
-  document.getElementById('tfalha').textContent=s.taxa_falha; document.getElementById('optouts').textContent=s.optouts_24h;
-  document.getElementById('vhoje').textContent=d.volume.hoje; document.getElementById('vteto').textContent=d.volume.teto;
-  document.getElementById('teto').value=d.volume.teto;
-  ATIVO=d.volume.ativo; var k=document.getElementById('kill'); k.textContent=ATIVO?'🟢 Ligado — desligar tudo':'⚪ Desligado — ligar';
-  // fila de aprovação
+  var d=await api('outbound');if(!d.ok)return;
+  var f=d.funil;
+  document.getElementById('agendados').textContent=f.agendados;
+  var base=f.disparados||1;
+  document.getElementById('funil').innerHTML=F.map((x,i)=>{
+    var v=f[x[0]],pct=x[0]=='disparados'?'':Math.round(v/base*100)+'%';
+    return '<div class="fstep"><b>'+v+'</b><span>'+x[1]+'</span>'+(pct?'<div class="pct">'+pct+'</div>':'')+'</div>'+(i<F.length-1?'<div class="arrow">›</div>':'')
+  }).join('');
+  document.getElementById('metalimite').textContent=(d.volume.meta_limite||'—').replace('Customers/24hr','').replace('/24hr','').trim();
+  var q=d.volume.meta_qualidade||'—';document.getElementById('metaqual').textContent={HIGH:'⭐ Alta',MEDIUM:'Média',LOW:'Baixa',UNKNOWN:'—'}[q]||q;
+  var s=d.saude,el=document.getElementById('saude');el.className='pill '+s.estado;el.textContent={boa:'✅ boa',atencao:'⚠️ atenção',ruim:'🔴 ruim'}[s.estado];
+  document.getElementById('tfalha').textContent=s.taxa_falha;document.getElementById('opts').textContent=s.enviados_24h;document.getElementById('optouts').textContent=s.optouts_24h;
+  document.getElementById('vhoje').textContent=d.volume.hoje;document.getElementById('vteto').textContent=d.volume.teto;document.getElementById('teto').value=d.volume.teto;
+  ATIVO=d.volume.ativo;document.getElementById('kill').textContent=ATIVO?'🟢 Ligado — desligar tudo':'⚪ Desligado — ligar';
   var ap=document.getElementById('aprovacao');
-  if(d.cohort_pendente){ap.classList.remove('hide');ap.innerHTML='<div class="mut">Fila de aprovação</div><div style="margin:8px 0"><b>'+h(d.cohort_pendente.nome)+'</b> — '+d.cohort_pendente.tamanho+' leads<br><span class="lead">'+h(d.cohort_pendente.hipotese||'')+'</span></div><button class="aprovar" onclick="aprovar(\''+d.cohort_pendente.id+'\')">Aprovar e liberar pro disparo</button>'}
-  else ap.innerHTML='<div class="mut">Fila de aprovação</div><p class="lead" style="margin-top:6px">Nenhum grupo esperando. O Preparador monta os próximos de madrugada.</p>';
-  // conversas
-  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="verConversa(\''+c.id+'\',\''+h(c.nome||'')+'\')"><b>'+h((c.nome||'?').split(" ")[0])+'</b> <span class="lead">'+h(c.especialidade||'')+' · '+h(c.cidade||'')+'</span><br><span class="lead">'+(c.quem==='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,70))+'</span></div>').join('')||'<p class="lead">Ninguém respondeu ainda. Assim que clicarem, aparece aqui.</p>';
+  if(d.cohort_pendente)ap.innerHTML='<h2>Fila de aprovação</h2><div style="margin:6px 0"><b style="color:var(--terra2)">'+h(d.cohort_pendente.nome)+'</b> — '+d.cohort_pendente.tamanho+' dentistas<br><span class="mut">'+h(d.cohort_pendente.hipotese||'')+'</span></div><button class="aprovar" onclick="aprovar(\''+d.cohort_pendente.id+'\')">Aprovar e liberar pro disparo</button>';
+  else ap.innerHTML='<h2>Fila de aprovação</h2><p class="mut">Nenhum grupo esperando. O Preparador monta os próximos de madrugada e te avisa no WhatsApp.</p>';
+  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="ver(\''+c.id+'\',\''+h(c.nome||'')+'\')"><span class="dot '+(c.quem=='lead'?'do':'dg')+'"></span><span class="nm">'+h((c.nome||'?').split(" ")[0])+'</span> <span class="meta">'+h(c.especialidade||'')+(c.cidade?' · '+h(c.cidade):'')+'</span><div class="last">'+(c.quem=='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,80))+'</div></div>').join('')||'<p class="mut">Ninguém respondeu ainda. Assim que clicarem, aparece aqui.</p>';
   setTimeout(loop,4000);
 }
 async function aprovar(id){if(!confirm('Aprovar este grupo? Vai pro disparo respeitando o teto do dia.'))return;await api('outbound_aprovar_cohort',{id});loop()}
-async function toggleAtivo(){if(!confirm(ATIVO?'DESLIGAR toda a máquina de outbound?':'LIGAR a máquina de outbound?'))return;await api('outbound_switch',{ativo:!ATIVO});loop()}
-async function salvarTeto(){var t=document.getElementById('teto').value;await api('outbound_teto',{teto:t});loop()}
-async function verConversa(id,nome){document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';var d=await api('outbound_conversa',{id});document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem==='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('')}
+async function toggleAtivo(){if(!confirm(ATIVO?'DESLIGAR toda a máquina?':'LIGAR a máquina?'))return;await api('outbound_switch',{ativo:!ATIVO});loop()}
+async function salvarTeto(){await api('outbound_teto',{teto:document.getElementById('teto').value});loop()}
+async function ver(id,nome){document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';var d=await api('outbound_conversa',{id});document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem=='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('')}
 function fechar(){document.getElementById('modal').style.display='none'}
-var sv=localStorage.getItem('smile_s'); if(sv){document.getElementById('senha').value=sv;entrar()}
+var sv=localStorage.getItem('smile_s');if(sv){document.getElementById('senha').value=sv;entrar()}
 </script>
