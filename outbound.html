@@ -1,0 +1,110 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smile — Máquina de Prospecção</title>
+<style>
+  :root{--verde:#1f4d3f;--verde2:#2c6b56;--terra:#c8663f;--terra2:#e07a4d;--bg:#0e1a16;--card:#15251f;--txt:#eaf2ee;--mut:#8fb0a2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font:15px/1.45 -apple-system,system-ui,sans-serif;padding:14px;max-width:920px;margin:0 auto}
+  h1{font-size:19px;color:var(--terra2)} .mut{color:var(--mut)}
+  .row{display:flex;gap:10px;flex-wrap:wrap} .row>*{flex:1}
+  .card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;border:1px solid #23392f}
+  .big{font-size:40px;font-weight:800;color:var(--terra2);line-height:1}
+  .funil{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+  .fstep{min-width:96px;background:#12211b;border-radius:10px;padding:10px;text-align:center;border:1px solid #23392f}
+  .fstep b{font-size:22px;display:block;color:var(--txt)} .fstep span{font-size:11px;color:var(--mut)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+  .boa{background:#1c3b2e;color:#7fe0a8} .atencao{background:#4a3a1a;color:#f0c674} .ruim{background:#4a1f1a;color:#f08a7a}
+  button{background:var(--verde2);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .kill{background:var(--terra)} .aprovar{background:#2c6b56;width:100%;padding:12px}
+  .conv{padding:10px;border-bottom:1px solid #23392f;cursor:pointer} .conv:hover{background:#1a2c24}
+  .conv b{color:var(--terra2)} .lead{font-size:12px;color:var(--mut)}
+  input[type=password],input[type=number]{background:#0e1a16;border:1px solid #23392f;color:#fff;border-radius:8px;padding:8px;width:100%}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:9}
+  .modal .inner{background:var(--card);border-radius:16px 16px 0 0;padding:16px;max-width:920px;width:100%;max-height:80vh;overflow:auto}
+  .bolha{max-width:80%;padding:8px 12px;border-radius:12px;margin:6px 0;white-space:pre-wrap}
+  .claudio{background:var(--verde2);margin-right:auto} .lead2{background:#2a2018;margin-left:auto}
+  .hide{display:none}
+</style>
+
+<div id="login">
+  <h1>🦷 Smile — Prospecção</h1>
+  <p class="mut" style="margin:8px 0">A máquina de outbound. Entra com a senha.</p>
+  <input id="senha" type="password" placeholder="senha" autocomplete="current-password">
+  <button onclick="entrar()" style="margin-top:10px;width:100%">Entrar</button>
+  <p id="err" style="color:var(--terra2);margin-top:8px"></p>
+</div>
+
+<div id="app" class="hide">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h1>🦷 Máquina de Prospecção</h1>
+    <button id="kill" class="kill" onclick="toggleAtivo()">…</button>
+  </div>
+
+  <div class="row">
+    <div class="card" style="text-align:center">
+      <div class="mut">Reuniões agendadas</div>
+      <div class="big" id="agendados">0</div>
+    </div>
+    <div class="card">
+      <div class="mut">Saúde do número</div>
+      <div style="margin:8px 0"><span id="saude" class="pill boa">…</span></div>
+      <div class="lead">falha <b id="tfalha">0</b>% · opt-out <b id="optouts">0</b> · hoje <b id="vhoje">0</b>/<b id="vteto">0</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="mut" style="margin-bottom:8px">Funil do dia</div>
+    <div class="funil" id="funil"></div>
+  </div>
+
+  <div class="card" id="aprovacao"></div>
+
+  <div class="card">
+    <div class="mut" style="margin-bottom:6px">Conversas ao vivo</div>
+    <div id="conversas"></div>
+  </div>
+
+  <div class="card">
+    <div class="mut">Volume por dia (teto)</div>
+    <div class="row" style="margin-top:8px;align-items:center">
+      <input type="number" id="teto" min="10" max="1000" style="max-width:120px">
+      <button onclick="salvarTeto()" style="max-width:140px">Salvar teto</button>
+    </div>
+    <p class="lead" style="margin-top:6px">Comece devagar (50/dia) e suba conforme a saúde do número se mantém boa. WhatsApp premia quem manda com qualidade.</p>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="inner">
+  <div style="display:flex;justify-content:space-between"><b id="mnome">—</b><button onclick="fechar()" style="padding:4px 10px">fechar</button></div>
+  <div id="mmsgs" style="margin-top:10px"></div>
+</div></div>
+
+<script>
+var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api', SENHA='', ATIVO=false;
+function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+async function api(acao,corpo){var r=await fetch(API+'?acao='+acao,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(corpo||{})});return r.json()}
+async function entrar(){SENHA=document.getElementById('senha').value;var r=await api('login');if(r.ok){localStorage.setItem('smile_s',SENHA);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}else document.getElementById('err').textContent='senha incorreta'}
+var FUNIL=[['disparados','disparados'],['entregues','entregues'],['lidos','lidos'],['responderam','responderam'],['conversando','conversando'],['agendados','agendados']];
+async function loop(){
+  var d=await api('outbound'); if(!d.ok)return;
+  document.getElementById('agendados').textContent=d.funil.agendados;
+  document.getElementById('funil').innerHTML=FUNIL.map(f=>'<div class="fstep"><b>'+d.funil[f[0]]+'</b><span>'+f[1]+'</span></div>').join('');
+  var s=d.saude; var el=document.getElementById('saude'); el.className='pill '+s.estado; el.textContent={boa:'✅ boa',atencao:'⚠️ atenção',ruim:'🔴 ruim'}[s.estado];
+  document.getElementById('tfalha').textContent=s.taxa_falha; document.getElementById('optouts').textContent=s.optouts_24h;
+  document.getElementById('vhoje').textContent=d.volume.hoje; document.getElementById('vteto').textContent=d.volume.teto;
+  document.getElementById('teto').value=d.volume.teto;
+  ATIVO=d.volume.ativo; var k=document.getElementById('kill'); k.textContent=ATIVO?'🟢 Ligado — desligar tudo':'⚪ Desligado — ligar';
+  // fila de aprovação
+  var ap=document.getElementById('aprovacao');
+  if(d.cohort_pendente){ap.classList.remove('hide');ap.innerHTML='<div class="mut">Fila de aprovação</div><div style="margin:8px 0"><b>'+h(d.cohort_pendente.nome)+'</b> — '+d.cohort_pendente.tamanho+' leads<br><span class="lead">'+h(d.cohort_pendente.hipotese||'')+'</span></div><button class="aprovar" onclick="aprovar(\''+d.cohort_pendente.id+'\')">Aprovar e liberar pro disparo</button>'}
+  else ap.innerHTML='<div class="mut">Fila de aprovação</div><p class="lead" style="margin-top:6px">Nenhum grupo esperando. O Preparador monta os próximos de madrugada.</p>';
+  // conversas
+  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="verConversa(\''+c.id+'\',\''+h(c.nome||'')+'\')"><b>'+h((c.nome||'?').split(" ")[0])+'</b> <span class="lead">'+h(c.especialidade||'')+' · '+h(c.cidade||'')+'</span><br><span class="lead">'+(c.quem==='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,70))+'</span></div>').join('')||'<p class="lead">Ninguém respondeu ainda. Assim que clicarem, aparece aqui.</p>';
+  setTimeout(loop,4000);
+}
+async function aprovar(id){if(!confirm('Aprovar este grupo? Vai pro disparo respeitando o teto do dia.'))return;await api('outbound_aprovar_cohort',{id});loop()}
+async function toggleAtivo(){if(!confirm(ATIVO?'DESLIGAR toda a máquina de outbound?':'LIGAR a máquina de outbound?'))return;await api('outbound_switch',{ativo:!ATIVO});loop()}
+async function salvarTeto(){var t=document.getElementById('teto').value;await api('outbound_teto',{teto:t});loop()}
+async function verConversa(id,nome){document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';var d=await api('outbound_conversa',{id});document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem==='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('')}
+function fechar(){document.getElementById('modal').style.display='none'}
+var sv=localStorage.getItem('smile_s'); if(sv){document.getElementById('senha').value=sv;entrar()}
+</script>
