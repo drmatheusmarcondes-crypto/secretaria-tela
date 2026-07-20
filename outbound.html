@@ -94,6 +94,8 @@
 
   <div class="card" id="aprovacao"></div>
 
+  <div class="card" id="cientista"></div>
+
   <div class="card">
     <h2>Conversas ao vivo</h2>
     <div id="conversas"></div>
@@ -129,6 +131,9 @@ async function loop(){
   var ap=document.getElementById('aprovacao');
   if(d.cohort_pendente)ap.innerHTML='<h2>Fila de aprovação</h2><div style="margin:6px 0"><b style="color:var(--terra2)">'+h(d.cohort_pendente.nome)+'</b> — '+d.cohort_pendente.tamanho+' dentistas<br><span class="mut">'+h(d.cohort_pendente.hipotese||'')+'</span></div><button class="aprovar" onclick="aprovar(\''+d.cohort_pendente.id+'\')">Aprovar e liberar pro disparo</button>';
   else ap.innerHTML='<h2>Fila de aprovação</h2><p class="mut">Nenhum grupo esperando. O Preparador monta os próximos de madrugada e te avisa no WhatsApp.</p>';
+  var ci=document.getElementById('cientista');
+  if(d.cientista&&d.cientista.melhorias&&d.cientista.melhorias.length)ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2>'+d.cientista.melhorias.map(m=>'<div style="margin:6px 0;padding-left:16px;border-left:3px solid var(--terra)">'+h(m)+'</div>').join('');
+  else ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2><p class="mut">O Cientista fecha o dia no fim da tarde e coloca as 2 melhorias aqui.</p>';
   document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="ver(\''+c.id+'\',\''+h(c.nome||'')+'\')"><span class="dot '+(c.quem=='lead'?'do':'dg')+'"></span><span class="nm">'+h((c.nome||'?').split(" ")[0])+'</span> <span class="meta">'+h(c.especialidade||'')+(c.cidade?' · '+h(c.cidade):'')+'</span><div class="last">'+(c.quem=='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,80))+'</div></div>').join('')||'<p class="mut">Ninguém respondeu ainda. Assim que clicarem, aparece aqui.</p>';
   setTimeout(loop,4000);
 }
