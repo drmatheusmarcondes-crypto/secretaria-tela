@@ -233,7 +233,17 @@ function pintarChat(r){
     var cls=m.autor;
     var rec=m.direcao==='outbound'?'<div class="meta-b">'+(m.status_entrega==='delivered'?'✓✓':m.status_entrega==='sent'?'✓':m.error_code?'⚠ '+h(m.error_code):'')+'</div>':'';
     var au=m.autor==='humano'?'<div class="autor">você</div>':m.autor==='bia'?'<div class="autor">Bia</div>':'';
-    return '<div class="bolha '+cls+'">'+au+h(m.conteudo)+rec+'</div>';
+    // mídia: vídeo/áudio/imagem aparecem de verdade (antes só o texto saía).
+    var mid='';
+    if(m.media_url){
+      if(m.tipo==='video') mid='<video src="'+h(m.media_url)+'" controls playsinline style="max-width:100%;border-radius:10px;margin:4px 0"></video>';
+      else if(m.tipo==='audio') mid='<audio src="'+h(m.media_url)+'" controls style="width:100%;margin:4px 0"></audio>';
+      else if(m.tipo==='imagem'||/\.(jpg|jpeg|png|webp)/i.test(m.media_url)) mid='<img src="'+h(m.media_url)+'" style="max-width:100%;border-radius:10px;margin:4px 0" loading="lazy">';
+      else mid='<a href="'+h(m.media_url)+'" target="_blank">📎 mídia</a>';
+    }
+    // ligação: mostra a gravação se houver
+    if(m.canal==='ligacao'&&m.media_url&&m.tipo==='audio') mid='<audio src="'+h(m.media_url)+'" controls style="width:100%;margin:4px 0"></audio>';
+    return '<div class="bolha '+cls+'">'+au+mid+h(m.conteudo||'')+rec+'</div>';
   }).join('');
   document.getElementById('c2').innerHTML=
     '<div class="chat-top"><div class="av">'+iniciais(l.nome||l.telefone)+'</div>'+
