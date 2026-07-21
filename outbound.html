@@ -29,7 +29,7 @@
   .conv{padding:12px;border-bottom:1px solid var(--linha);cursor:pointer;border-radius:8px}.conv:active{background:#1e332b}
   .conv .nm{color:var(--terra2);font-weight:700}.conv .meta{font-size:12px;color:var(--mut)}.conv .last{font-size:13px;color:#c5d8cf;margin-top:3px}
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.dg{background:#7fe0a8}.do{background:#f0c674}
-  input[type=password],input[type=number]{background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:11px;width:100%;font-size:15px}
+  input[type=password],input[type=number],input[type=email]{background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:11px;width:100%;font-size:15px}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9;padding:12px}
   .modal .inner{background:transparent;border:0;padding:0;max-width:420px;width:100%}
   /* mockup de celular WhatsApp */
@@ -54,8 +54,9 @@
 
 <div id="login" class="card" style="max-width:400px;margin:60px auto">
   <h1>🦷 Smile — Prospecção</h1>
-  <p class="mut" style="margin:10px 0">Entra com a senha.</p>
-  <input id="senha" type="password" placeholder="senha" autocomplete="current-password">
+  <p class="mut" style="margin:10px 0">Entra com seu e-mail.</p>
+  <input id="email" type="email" placeholder="seu e-mail" autocomplete="username" style="margin-bottom:8px">
+  <input id="senha" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
   <button onclick="entrar()" style="margin-top:12px;width:100%">Entrar</button>
   <p id="err" style="color:var(--terra2);margin-top:8px"></p>
 </div>
@@ -165,7 +166,7 @@
 </div></div>
 
 <script>
-var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SENHA='',ATIVO=false;
+var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',TOKEN='',ATIVO=false;
 var CHAT=[];
 function chatHist(){return CHAT.filter(function(m){return m.role==='user'||m.role==='assistant';}).map(function(m){return {role:m.role,content:m.content};});}
 function renderChat(){var c=document.getElementById('chatmsgs');c.innerHTML=CHAT.map(function(m){
@@ -179,8 +180,9 @@ async function chatEnviar(){var i=document.getElementById('chatinput');var t=i.v
 async function escolhePrint(url,desc){CHAT.push({role:'user',content:'Quero usar esse print: '+url+(desc?' ('+desc+')':''),img:url});renderChat();await chatResponde();}
 async function subirPrint(inp){var f=inp.files&&inp.files[0];if(!f)return;inp.value='';var reader=new FileReader();reader.onload=async function(){var dataUrl=reader.result;var b=document.getElementById('chatbtn');b.disabled=true;b.textContent='…';try{var up=await api('outbound_upload_print',{arquivo:dataUrl});if(up&&up.ok&&up.url){CHAT.push({role:'user',content:'Subi este print pra usar. A URL é: '+up.url,img:up.url});renderChat();await chatResponde();}else{CHAT.push({role:'assistant',content:'não consegui subir a imagem 😕 tenta de novo'});renderChat();}}catch(e){CHAT.push({role:'assistant',content:'erro ao subir a imagem'});renderChat();}b.disabled=false;b.textContent='➤';};reader.readAsDataURL(f);}
 function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-async function api(a,c){var r=await fetch(API+'?acao='+a,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(c||{})});return r.json()}
-async function entrar(){SENHA=document.getElementById('senha').value;var r=await api('login');if(r.ok){localStorage.setItem('smile_s',SENHA);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}else document.getElementById('err').textContent='senha incorreta'}
+async function api(a,c){var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(c||{})};var r=await fetch(API+'?acao='+a,o);if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+a,o)}return r.json()}
+async function renova(){var rt=localStorage.getItem('smile_rt');if(!rt)return false;try{var r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({refresh_token:rt})});var d=await r.json();if(d.access_token){TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);return true}}catch(e){}localStorage.removeItem('smile_tok');localStorage.removeItem('smile_rt');return false}
+async function entrar(){var email=(document.getElementById('email').value||'').trim().toLowerCase();var pw=document.getElementById('senha').value;var err=document.getElementById('err');err.textContent='entrando...';try{var lr=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({email:email,password:pw})});var ld=await lr.json();if(!lr.ok||!ld.access_token){err.textContent='e-mail ou senha incorretos';return}TOKEN=ld.access_token;localStorage.setItem('smile_tok',TOKEN);if(ld.refresh_token)localStorage.setItem('smile_rt',ld.refresh_token);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}catch(e){err.textContent='erro ao entrar, tenta de novo'}}
 var F=[['disparados','disparados'],['entregues','entregues'],['lidos','lidos'],['responderam','responderam'],['conversando','conversando'],['agendados','agendados']];
 async function loop(){
   var d=await api('outbound');if(!d.ok)return;
@@ -241,5 +243,5 @@ async function assumirOut(){await api('outbound_assumir',{id:SELOUT});await reca
 async function devolverOut(){await api('outbound_devolver',{id:SELOUT});await recarregaConv()}
 async function enviarOut(){var i=document.getElementById('mtxt');var t=i.value.trim();if(!t)return;i.value='';await api('outbound_enviar',{id:SELOUT,texto:t});await recarregaConv()}
 function fechar(){document.getElementById('modal').style.display='none';SELOUT=null}
-var sv=localStorage.getItem('smile_s');if(sv){document.getElementById('senha').value=sv;entrar()}
+var sv=localStorage.getItem('smile_tok');if(sv){TOKEN=sv;document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}
 </script>
