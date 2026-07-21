@@ -131,7 +131,8 @@
   <div class="card">
     <h1>Secretar-IA</h1>
     <p>o cockpit da Bia</p>
-    <input id="senha" type="password" placeholder="senha" autocomplete="current-password">
+    <input id="email" type="email" placeholder="seu e-mail" autocomplete="username" style="margin-bottom:8px">
+    <input id="senha" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
     <button onclick="entrar()">entrar</button>
     <div class="erro" id="loginErro"></div>
   </div>
@@ -176,20 +177,27 @@
 
 <script>
 var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api';
+var SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',TOKEN='';
 var SENHA='', LEADS=[], SEL=null, DADOS=null, CONV=null, timer=null;
 
 function h(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function iniciais(n){n=(n||'?').trim();var p=n.split(' ');return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase()}
 
 async function api(acao,corpo){
-  var r=await fetch(API+'?acao='+acao,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(corpo||{})});
+  var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(corpo||{})};
+  var r=await fetch(API+'?acao='+acao,o);
+  if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+acao,o);}
   return r.json();
 }
+async function renova(){var rt=localStorage.getItem('bia_rt');if(!rt)return false;try{var r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({refresh_token:rt})});var d=await r.json();if(d.access_token){TOKEN=d.access_token;localStorage.setItem('bia_tok',TOKEN);if(d.refresh_token)localStorage.setItem('bia_rt',d.refresh_token);return true;}}catch(e){}localStorage.removeItem('bia_tok');localStorage.removeItem('bia_rt');return false;}
 async function entrar(){
-  SENHA=document.getElementById('senha').value;
-  var r=await api('login');
-  if(r.ok){ localStorage.setItem('bia_senha',SENHA); document.getElementById('login').classList.add('hide'); document.getElementById('app').classList.remove('hide'); loop(); }
-  else document.getElementById('loginErro').textContent='senha incorreta';
+  var email=(document.getElementById('email').value||'').trim().toLowerCase();var pw=document.getElementById('senha').value;
+  var err=document.getElementById('loginErro');err.textContent='entrando...';
+  try{var lr=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({email:email,password:pw})});var ld=await lr.json();
+  if(!lr.ok||!ld.access_token){err.textContent='e-mail ou senha incorretos';return;}
+  TOKEN=ld.access_token;localStorage.setItem('bia_tok',TOKEN);if(ld.refresh_token)localStorage.setItem('bia_rt',ld.refresh_token);
+  document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop();}
+  catch(e){err.textContent='erro ao entrar, tenta de novo';}
 }
 async function loop(){ await carregar(); if(SEL) await abrir(SEL,true); clearInterval(timer); timer=setInterval(tick,2500); }
 async function tick(){ await carregar(); if(SEL) await abrir(SEL,true); }
@@ -313,8 +321,8 @@ async function abrirMetricas(){
 }
 function fecharMetricas(){document.getElementById('metricas').classList.add('hide')}
 
-var salva=localStorage.getItem('bia_senha');
-if(salva){document.getElementById('senha').value=salva;entrar();}
+var salva=localStorage.getItem('bia_tok');
+if(salva){TOKEN=salva;document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop();}
 </script>
 </body>
 </html>
