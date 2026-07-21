@@ -30,10 +30,24 @@
   .conv .nm{color:var(--terra2);font-weight:700}.conv .meta{font-size:12px;color:var(--mut)}.conv .last{font-size:13px;color:#c5d8cf;margin-top:3px}
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.dg{background:#7fe0a8}.do{background:#f0c674}
   input[type=password],input[type=number]{background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:11px;width:100%;font-size:15px}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:9}
-  .modal .inner{background:var(--card);border-radius:18px 18px 0 0;padding:18px;max-width:960px;width:100%;max-height:82vh;overflow:auto}
-  .bolha{max-width:82%;padding:9px 13px;border-radius:14px;margin:7px 0;white-space:pre-wrap;font-size:14px}
-  .claudio{background:var(--verde2)}.lead2{background:#33261c;margin-left:auto}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9;padding:12px}
+  .modal .inner{background:transparent;border:0;padding:0;max-width:420px;width:100%}
+  /* mockup de celular WhatsApp */
+  .fone{background:#0b141a;border-radius:28px;overflow:hidden;border:4px solid #223039;box-shadow:0 14px 50px rgba(0,0,0,.7);display:flex;flex-direction:column;height:86vh;max-height:780px}
+  .fone-top{background:#202c33;padding:11px 12px;display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .fone-back{background:transparent;padding:2px 6px;font-size:22px;color:#aebac1;border:0}
+  .fone-av{width:38px;height:38px;border-radius:50%;background:#c8663f;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px;flex-shrink:0}
+  .fone-nome{font-weight:600;font-size:15px;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fone-num{font-size:12px;color:#8696a0;margin-top:1px}
+  .fone-num a{color:#53bdeb;text-decoration:none;font-weight:600}
+  .fone-body{flex:1;overflow-y:auto;padding:12px 10px;background:#0b141a;background-image:radial-gradient(rgba(255,255,255,.02) 1px,transparent 1px);background-size:18px 18px;display:flex;flex-direction:column}
+  .wb{max-width:82%;padding:6px 10px 5px;border-radius:9px;margin:3px 0;font-size:13.5px;line-height:1.42;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.2)}
+  .wb.rx{background:#202c33;color:#e9edef;align-self:flex-start;border-top-left-radius:2px}
+  .wb.tx{background:#005c4b;color:#e9edef;align-self:flex-end;border-top-right-radius:2px}
+  .fone-acao{padding:8px 10px;background:#111b21;flex-shrink:0;font-size:13px}
+  .fone-comp{display:flex;gap:8px;padding:8px 10px;background:#202c33;flex-shrink:0}
+  .fone-comp input{flex:1;background:#2a3942;border:0;border-radius:20px;padding:10px 14px;color:#fff;font-size:14px}
+  .fone-comp button{border-radius:50%;width:42px;height:42px;padding:0;background:#00a884;flex-shrink:0}
   .hide{display:none}
   h2{font-size:14px;color:var(--mut);margin-bottom:10px;font-weight:600}
 </style>
@@ -120,12 +134,21 @@
 </div>
 
 <div class="modal" id="modal"><div class="inner">
-  <div style="display:flex;justify-content:space-between;align-items:center"><b id="mnome">—</b><button onclick="fechar()" style="padding:6px 12px;background:#33261c">fechar</button></div>
-  <div id="mmsgs" style="margin-top:12px"></div>
-  <div id="macoes" style="margin-top:12px"></div>
-  <div id="mcompositor" style="margin-top:10px;display:none;gap:8px">
-    <input id="mtxt" placeholder="escreva como você..." style="flex:1;padding:11px;border-radius:10px;border:1px solid #4a3524;background:#231810;color:#fff;font-size:15px" onkeydown="if(event.key==='Enter')enviarOut()">
-    <button onclick="enviarOut()" style="padding:11px 18px;border:0;border-radius:10px;background:#2f7d55;color:#fff;font-size:15px">➤</button>
+  <div class="fone">
+    <div class="fone-top">
+      <button class="fone-back" onclick="fechar()">‹</button>
+      <div class="fone-av" id="mav">?</div>
+      <div style="flex:1;min-width:0">
+        <div class="fone-nome" id="mnome">—</div>
+        <div class="fone-num" id="mnum"></div>
+      </div>
+    </div>
+    <div class="fone-body" id="mmsgs"></div>
+    <div class="fone-acao" id="macoes"></div>
+    <div class="fone-comp" id="mcompositor" style="display:none">
+      <input id="mtxt" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarOut()">
+      <button onclick="enviarOut()">➤</button>
+    </div>
   </div>
 </div></div>
 
@@ -174,14 +197,19 @@ async function aprovar(id){if(!confirm('Aprovar este grupo? Vai pro disparo resp
 async function toggleAtivo(){if(!confirm(ATIVO?'DESLIGAR toda a máquina?':'LIGAR a máquina?'))return;await api('outbound_switch',{ativo:!ATIVO});loop()}
 async function salvarTeto(){await api('outbound_teto',{teto:document.getElementById('teto').value});loop()}
 var SELOUT=null;
-async function ver(id,nome){SELOUT=id;document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';await recarregaConv()}
+async function ver(id,nome){SELOUT=id;document.getElementById('modal').style.display='flex';await recarregaConv()}
 async function recarregaConv(){
-  var d=await api('outbound_conversa',{id:SELOUT});
-  document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem=='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('');
-  var humano=d.lead&&d.lead.modo_conversa==='humano';
+  var d=await api('outbound_conversa',{id:SELOUT});var l=d.lead||{};
+  var nome=(l.nome||'?');
+  document.getElementById('mnome').textContent=nome;
+  document.getElementById('mav').textContent=(nome.trim()[0]||'?').toUpperCase();
+  var tel=(l.telefone||'').replace(/[^0-9]/g,'');
+  document.getElementById('mnum').innerHTML=tel?('<a href="https://wa.me/'+tel+'" target="_blank">'+h(l.telefone)+' · abrir no WhatsApp</a>'):'';
+  document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="wb '+(m.quem=='lead'?'rx':'tx')+'">'+h(m.conteudo)+'</div>').join('');
+  var humano=l.modo_conversa==='humano';
   document.getElementById('macoes').innerHTML=humano
-    ?'<button onclick="devolverOut()" style="padding:9px 15px;border:0;border-radius:10px;background:#33261c;color:#fff">↩ devolver pro Claudio</button> <span class="mut" style="margin-left:8px">você assumiu — o Claudio parou</span>'
-    :'<button onclick="assumirOut()" style="padding:9px 15px;border:0;border-radius:10px;background:#c96a3f;color:#fff;font-weight:600">✋ assumir conversa</button>';
+    ?'<button onclick="devolverOut()" style="padding:8px 14px;border:0;border-radius:20px;background:#2a3942;color:#fff">↩ devolver pro Claudio</button> <span style="color:#8696a0;margin-left:8px">você assumiu — a IA parou</span>'
+    :'<span style="color:#8696a0">🤖 Claudio respondendo · </span><button onclick="assumirOut()" style="padding:8px 14px;border:0;border-radius:20px;background:#c8663f;color:#fff;font-weight:600">✋ assumir</button>';
   document.getElementById('mcompositor').style.display=humano?'flex':'none';
   var mm=document.getElementById('mmsgs');mm.scrollTop=mm.scrollHeight;
 }
