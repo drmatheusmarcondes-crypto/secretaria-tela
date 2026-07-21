@@ -70,6 +70,16 @@
     <button id="kill" class="kill" onclick="toggleAtivo()">…</button>
   </div>
 
+  <div class="card" style="border:1px solid #c8663f66;background:linear-gradient(135deg,#1c2c24,#16241f)">
+    <h2 style="color:var(--terra2);font-size:15px">💬 Montar disparo (chat)</h2>
+    <p class="mut" style="margin-bottom:10px">Me pede o grupo que você quer. Ex: <i>"me dá implanto de SP que fatura alto"</i></p>
+    <div id="chatmsgs" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="chatinput" placeholder="qual grupo você quer disparar?" style="flex:1;background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:12px;font-size:15px" onkeydown="if(event.key==='Enter')chatEnviar()">
+      <button onclick="chatEnviar()" id="chatbtn">➤</button>
+    </div>
+  </div>
+
   <div class="grid g2">
     <div class="card hero">
       <div class="label">Reuniões agendadas</div>
@@ -154,6 +164,9 @@
 
 <script>
 var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SENHA='',ATIVO=false;
+var CHAT=[];
+function renderChat(){var c=document.getElementById('chatmsgs');c.innerHTML=CHAT.map(function(m){var txt=typeof m.content==='string'?m.content:'';var eu=m.role==='user';return '<div style="max-width:85%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;'+(eu?'align-self:flex-end;background:#c8663f;color:#fff':'align-self:flex-start;background:#1b2e27;color:#eef5f1')+'">'+h(txt)+'</div>';}).join('');c.scrollTop=c.scrollHeight;}
+async function chatEnviar(){var i=document.getElementById('chatinput');var t=i.value.trim();if(!t)return;i.value='';CHAT.push({role:'user',content:t});CHAT.push({role:'assistant',content:'digitando…'});renderChat();var b=document.getElementById('chatbtn');b.disabled=true;try{var r=await api('chat_disparo',{mensagens:CHAT.slice(0,-1)});CHAT.pop();CHAT.push({role:'assistant',content:(r&&r.texto)||'…'});}catch(e){CHAT.pop();CHAT.push({role:'assistant',content:'deu um erro aqui, tenta de novo'});}b.disabled=false;renderChat();}
 function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 async function api(a,c){var r=await fetch(API+'?acao='+a,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(c||{})});return r.json()}
 async function entrar(){SENHA=document.getElementById('senha').value;var r=await api('login');if(r.ok){localStorage.setItem('smile_s',SENHA);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}else document.getElementById('err').textContent='senha incorreta'}
