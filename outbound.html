@@ -114,7 +114,7 @@
   <div class="card" id="cientista"></div>
 
   <div class="card">
-    <h2>Conversas ao vivo</h2>
+    <h2>💬 Quem clicou e tá conversando <span id="aguard" class="mut" style="font-weight:400"></span></h2>
     <div id="conversas"></div>
   </div>
 </div>
@@ -161,7 +161,8 @@ async function loop(){
   var ci=document.getElementById('cientista');
   if(d.cientista&&d.cientista.melhorias&&d.cientista.melhorias.length)ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2>'+d.cientista.melhorias.map(m=>'<div style="margin:6px 0;padding-left:16px;border-left:3px solid var(--terra)">'+h(m)+'</div>').join('');
   else ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2><p class="mut">O Cientista fecha o dia no fim da tarde e coloca as 2 melhorias aqui.</p>';
-  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="ver(\''+c.id+'\',\''+h(c.nome||'')+'\')"><span class="dot '+(c.quem=='lead'?'do':'dg')+'"></span><span class="nm">'+h((c.nome||'?').split(" ")[0])+'</span> <span class="meta">'+h(c.especialidade||'')+(c.cidade?' · '+h(c.cidade):'')+'</span><div class="last">'+(c.quem=='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,80))+'</div></div>').join('')||'<p class="mut">Ninguém respondeu ainda. Assim que clicarem, aparece aqui.</p>';
+  document.getElementById('aguard').textContent=d.aguardando?('· '+d.aguardando+' receberam e ainda não responderam'):'';
+  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(c=>'<div class="conv" onclick="ver(\''+c.id+'\',\''+h(c.nome||'')+'\')"><span class="dot '+(c.quem=='lead'?'do':'dg')+'"></span><span class="nm">'+h((c.nome||'?').split(" ")[0])+'</span> <span class="meta">'+h(c.especialidade||'')+(c.cidade?' · '+h(c.cidade):'')+'</span>'+(c.status=='agendou'?' <span style="color:#7fe0a8;font-weight:700">✓ agendou</span>':'')+'<div class="last">'+(c.quem=='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,80))+'</div></div>').join('')||'<p class="mut">Ninguém clicou ainda. Assim que responderem, a conversa aparece aqui — igual no Bio.</p>';
   setTimeout(loop,4000);
 }
 async function aprovar(id){if(!confirm('Aprovar este grupo? Vai pro disparo respeitando o teto do dia.'))return;await api('outbound_aprovar_cohort',{id});loop()}
