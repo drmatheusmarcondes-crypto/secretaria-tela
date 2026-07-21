@@ -74,7 +74,9 @@
     <h2 style="color:var(--terra2);font-size:15px">💬 Montar disparo (chat)</h2>
     <p class="mut" style="margin-bottom:10px">Me pede o grupo que você quer. Ex: <i>"me dá implanto de SP que fatura alto"</i></p>
     <div id="chatmsgs" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px"></div>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <label for="printfile" style="cursor:pointer;font-size:22px;padding:0 2px" title="subir um print">📎</label>
+      <input type="file" id="printfile" accept="image/*" style="display:none" onchange="subirPrint(this)">
       <input id="chatinput" placeholder="qual grupo você quer disparar?" style="flex:1;background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:12px;font-size:15px" onkeydown="if(event.key==='Enter')chatEnviar()">
       <button onclick="chatEnviar()" id="chatbtn">➤</button>
     </div>
@@ -165,8 +167,17 @@
 <script>
 var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SENHA='',ATIVO=false;
 var CHAT=[];
-function renderChat(){var c=document.getElementById('chatmsgs');c.innerHTML=CHAT.map(function(m){var txt=typeof m.content==='string'?m.content:'';var eu=m.role==='user';return '<div style="max-width:85%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;'+(eu?'align-self:flex-end;background:#c8663f;color:#fff':'align-self:flex-start;background:#1b2e27;color:#eef5f1')+'">'+h(txt)+'</div>';}).join('');c.scrollTop=c.scrollHeight;}
-async function chatEnviar(){var i=document.getElementById('chatinput');var t=i.value.trim();if(!t)return;i.value='';CHAT.push({role:'user',content:t});CHAT.push({role:'assistant',content:'digitando…'});renderChat();var b=document.getElementById('chatbtn');b.disabled=true;try{var r=await api('chat_disparo',{mensagens:CHAT.slice(0,-1)});CHAT.pop();CHAT.push({role:'assistant',content:(r&&r.texto)||'…'});}catch(e){CHAT.pop();CHAT.push({role:'assistant',content:'deu um erro aqui, tenta de novo'});}b.disabled=false;renderChat();}
+function chatHist(){return CHAT.filter(function(m){return m.role==='user'||m.role==='assistant';}).map(function(m){return {role:m.role,content:m.content};});}
+function renderChat(){var c=document.getElementById('chatmsgs');c.innerHTML=CHAT.map(function(m){
+  if(m.role==='prints'){return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-self:flex-start;max-width:100%">'+(m.prints||[]).map(function(p){return '<div onclick="escolhePrint(\''+p.url+'\',\''+h((p.descricao||'')).replace(/\x27/g,\"\").slice(0,50)+'\')" style="cursor:pointer;width:112px;border:1px solid #2c6b56;border-radius:10px;overflow:hidden;background:#0d1714"><img src="'+p.url+'" style="width:100%;height:135px;object-fit:cover;display:block"><div style="font-size:10px;padding:5px;color:#8fb0a2;line-height:1.3">'+h((p.descricao||'').slice(0,45))+'</div></div>';}).join('')+'</div>';}
+  if(m.img){var euI=m.role==='user';return '<div style="align-self:'+(euI?'flex-end':'flex-start')+';max-width:68%"><img src="'+m.img+'" style="width:100%;border-radius:12px;border:2px solid #c8663f;display:block"><div style="font-size:11px;color:#8fb0a2;margin-top:3px;text-align:'+(euI?'right':'left')+'">📎 print</div></div>';}
+  var txt=typeof m.content==='string'?m.content:'';var eu=m.role==='user';
+  return '<div style="max-width:85%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;'+(eu?'align-self:flex-end;background:#c8663f;color:#fff':'align-self:flex-start;background:#1b2e27;color:#eef5f1')+'">'+h(txt)+'</div>';
+}).join('');c.scrollTop=c.scrollHeight;}
+async function chatResponde(){var b=document.getElementById('chatbtn');b.disabled=true;b.textContent='…';try{var r=await api('chat_disparo',{mensagens:chatHist()});CHAT.push({role:'assistant',content:(r&&r.texto)||'…'});if(r&&r.prints&&r.prints.length)CHAT.push({role:'prints',prints:r.prints});}catch(e){CHAT.push({role:'assistant',content:'deu um erro aqui, tenta de novo'});}b.disabled=false;b.textContent='➤';renderChat();}
+async function chatEnviar(){var i=document.getElementById('chatinput');var t=i.value.trim();if(!t)return;i.value='';CHAT.push({role:'user',content:t});renderChat();await chatResponde();}
+async function escolhePrint(url,desc){CHAT.push({role:'user',content:'Quero usar esse print: '+url+(desc?' ('+desc+')':''),img:url});renderChat();await chatResponde();}
+async function subirPrint(inp){var f=inp.files&&inp.files[0];if(!f)return;inp.value='';var reader=new FileReader();reader.onload=async function(){var dataUrl=reader.result;var b=document.getElementById('chatbtn');b.disabled=true;b.textContent='…';try{var up=await api('outbound_upload_print',{arquivo:dataUrl});if(up&&up.ok&&up.url){CHAT.push({role:'user',content:'Subi este print pra usar. A URL é: '+up.url,img:up.url});renderChat();await chatResponde();}else{CHAT.push({role:'assistant',content:'não consegui subir a imagem 😕 tenta de novo'});renderChat();}}catch(e){CHAT.push({role:'assistant',content:'erro ao subir a imagem'});renderChat();}b.disabled=false;b.textContent='➤';};reader.readAsDataURL(f);}
 function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 async function api(a,c){var r=await fetch(API+'?acao='+a,{method:'POST',headers:{'content-type':'application/json','x-senha':SENHA},body:JSON.stringify(c||{})});return r.json()}
 async function entrar(){SENHA=document.getElementById('senha').value;var r=await api('login');if(r.ok){localStorage.setItem('smile_s',SENHA);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}else document.getElementById('err').textContent='senha incorreta'}
