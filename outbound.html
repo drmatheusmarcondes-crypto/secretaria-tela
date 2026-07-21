@@ -122,6 +122,11 @@
 <div class="modal" id="modal"><div class="inner">
   <div style="display:flex;justify-content:space-between;align-items:center"><b id="mnome">—</b><button onclick="fechar()" style="padding:6px 12px;background:#33261c">fechar</button></div>
   <div id="mmsgs" style="margin-top:12px"></div>
+  <div id="macoes" style="margin-top:12px"></div>
+  <div id="mcompositor" style="margin-top:10px;display:none;gap:8px">
+    <input id="mtxt" placeholder="escreva como você..." style="flex:1;padding:11px;border-radius:10px;border:1px solid #4a3524;background:#231810;color:#fff;font-size:15px" onkeydown="if(event.key==='Enter')enviarOut()">
+    <button onclick="enviarOut()" style="padding:11px 18px;border:0;border-radius:10px;background:#2f7d55;color:#fff;font-size:15px">➤</button>
+  </div>
 </div></div>
 
 <script>
@@ -168,7 +173,21 @@ async function loop(){
 async function aprovar(id){if(!confirm('Aprovar este grupo? Vai pro disparo respeitando o teto do dia.'))return;await api('outbound_aprovar_cohort',{id});loop()}
 async function toggleAtivo(){if(!confirm(ATIVO?'DESLIGAR toda a máquina?':'LIGAR a máquina?'))return;await api('outbound_switch',{ativo:!ATIVO});loop()}
 async function salvarTeto(){await api('outbound_teto',{teto:document.getElementById('teto').value});loop()}
-async function ver(id,nome){document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';var d=await api('outbound_conversa',{id});document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem=='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('')}
-function fechar(){document.getElementById('modal').style.display='none'}
+var SELOUT=null;
+async function ver(id,nome){SELOUT=id;document.getElementById('mnome').textContent=nome;document.getElementById('modal').style.display='flex';await recarregaConv()}
+async function recarregaConv(){
+  var d=await api('outbound_conversa',{id:SELOUT});
+  document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(m=>'<div class="bolha '+(m.quem=='lead'?'lead2':'claudio')+'">'+h(m.conteudo)+'</div>').join('');
+  var humano=d.lead&&d.lead.modo_conversa==='humano';
+  document.getElementById('macoes').innerHTML=humano
+    ?'<button onclick="devolverOut()" style="padding:9px 15px;border:0;border-radius:10px;background:#33261c;color:#fff">↩ devolver pro Claudio</button> <span class="mut" style="margin-left:8px">você assumiu — o Claudio parou</span>'
+    :'<button onclick="assumirOut()" style="padding:9px 15px;border:0;border-radius:10px;background:#c96a3f;color:#fff;font-weight:600">✋ assumir conversa</button>';
+  document.getElementById('mcompositor').style.display=humano?'flex':'none';
+  var mm=document.getElementById('mmsgs');mm.scrollTop=mm.scrollHeight;
+}
+async function assumirOut(){await api('outbound_assumir',{id:SELOUT});await recarregaConv()}
+async function devolverOut(){await api('outbound_devolver',{id:SELOUT});await recarregaConv()}
+async function enviarOut(){var i=document.getElementById('mtxt');var t=i.value.trim();if(!t)return;i.value='';await api('outbound_enviar',{id:SELOUT,texto:t});await recarregaConv()}
+function fechar(){document.getElementById('modal').style.display='none';SELOUT=null}
 var sv=localStorage.getItem('smile_s');if(sv){document.getElementById('senha').value=sv;entrar()}
 </script>
