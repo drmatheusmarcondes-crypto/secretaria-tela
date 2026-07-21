@@ -62,7 +62,7 @@
 </div>
 
 <div id="app" class="hide grid">
-  <div style="display:flex;gap:8px;background:#12211b;padding:6px;border-radius:12px">
+  <div id="navtabs" style="display:flex;gap:8px;background:#12211b;padding:6px;border-radius:12px">
     <a href="./index.html" style="flex:1;text-align:center;padding:10px;border-radius:8px;color:var(--mut);text-decoration:none;font-weight:700">🌱 Máquina Bio</a>
     <span style="flex:1;text-align:center;padding:10px;border-radius:8px;background:var(--verde2);color:#fff;font-weight:700">🚀 Máquina de Disparo</span>
   </div>
@@ -243,5 +243,6 @@ async function assumirOut(){await api('outbound_assumir',{id:SELOUT});await reca
 async function devolverOut(){await api('outbound_devolver',{id:SELOUT});await recarregaConv()}
 async function enviarOut(){var i=document.getElementById('mtxt');var t=i.value.trim();if(!t)return;i.value='';await api('outbound_enviar',{id:SELOUT,texto:t});await recarregaConv()}
 function fechar(){document.getElementById('modal').style.display='none';SELOUT=null}
+if(window.self!==window.top){var _nt=document.getElementById('navtabs');if(_nt)_nt.style.display='none';document.body.style.padding='10px'}
 var sv=localStorage.getItem('smile_tok');if(sv){TOKEN=sv;document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}
 </script>
