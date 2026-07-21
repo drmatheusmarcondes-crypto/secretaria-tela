@@ -55,7 +55,7 @@ function aba(q){
 function mostrarApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='flex';
-  if(!carregou){document.getElementById('fdisp').src='./outbound.html';document.getElementById('fbio').src='./index.html';carregou=true;}
+  if(!carregou){var t=encodeURIComponent(localStorage.getItem('smile_tok')||''),rt=encodeURIComponent(localStorage.getItem('smile_rt')||'');document.getElementById('fdisp').src='./outbound.html#tok='+t+'&rt='+rt;document.getElementById('fbio').src='./index.html#tok='+t+'&rt='+rt;carregou=true;}
   aba('disp');
 }
 async function entrar(){
