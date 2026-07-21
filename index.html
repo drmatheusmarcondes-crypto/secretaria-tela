@@ -322,7 +322,8 @@ async function abrirMetricas(){
 function fecharMetricas(){document.getElementById('metricas').classList.add('hide')}
 
 if(window.self!==window.top){var _nt=document.getElementById('navtabs');if(_nt)_nt.style.display='none';}
-var salva=localStorage.getItem('smile_tok');
+function _tokH(){try{var m=/tok=([^&]*)/.exec(location.hash||'');if(m&&m[1]){var t=decodeURIComponent(m[1]);if(t){localStorage.setItem('smile_tok',t);var r=/rt=([^&]*)/.exec(location.hash||'');if(r&&r[1])localStorage.setItem('smile_rt',decodeURIComponent(r[1]));return t;}}}catch(e){}return localStorage.getItem('smile_tok');}
+var salva=_tokH();
 if(salva){TOKEN=salva;document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop();}
 </script>
 </body>
