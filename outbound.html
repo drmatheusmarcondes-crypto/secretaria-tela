@@ -47,8 +47,12 @@
 </div>
 
 <div id="app" class="hide grid">
+  <div style="display:flex;gap:8px;background:#12211b;padding:6px;border-radius:12px">
+    <a href="./index.html" style="flex:1;text-align:center;padding:10px;border-radius:8px;color:var(--mut);text-decoration:none;font-weight:700">🌱 Máquina Bio</a>
+    <span style="flex:1;text-align:center;padding:10px;border-radius:8px;background:var(--verde2);color:#fff;font-weight:700">🚀 Máquina de Disparo</span>
+  </div>
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <h1>🦷 Máquina de Prospecção</h1>
+    <h1>🚀 Máquina de Disparo</h1>
     <button id="kill" class="kill" onclick="toggleAtivo()">…</button>
   </div>
 
@@ -92,6 +96,19 @@
     </div>
   </div>
 
+  <div class="grid g2">
+    <div class="card">
+      <h2>💰 Gasto (Twilio)</h2>
+      <div style="font-size:26px;font-weight:800">Saldo: <span id="saldo">—</span></div>
+      <div class="mut" style="margin-top:8px">no mês: <b id="cmes">—</b> · ~<b id="cmsg">—</b>/mensagem · estimativa <b id="cdia">—</b>/dia</div>
+      <p class="mut" id="cwarn" style="margin-top:6px;color:var(--terra2)"></p>
+    </div>
+    <div class="card">
+      <h2>📵 Não receberam (sem WhatsApp/bloqueado)</h2>
+      <div id="naoreceb" class="mut">—</div>
+    </div>
+  </div>
+
   <div class="card" id="aprovacao"></div>
 
   <div class="card" id="cientista"></div>
@@ -131,6 +148,16 @@ async function loop(){
   var ap=document.getElementById('aprovacao');
   if(d.cohort_pendente)ap.innerHTML='<h2>Fila de aprovação</h2><div style="margin:6px 0"><b style="color:var(--terra2)">'+h(d.cohort_pendente.nome)+'</b> — '+d.cohort_pendente.tamanho+' dentistas<br><span class="mut">'+h(d.cohort_pendente.hipotese||'')+'</span></div><button class="aprovar" onclick="aprovar(\''+d.cohort_pendente.id+'\')">Aprovar e liberar pro disparo</button>';
   else ap.innerHTML='<h2>Fila de aprovação</h2><p class="mut">Nenhum grupo esperando. O Preparador monta os próximos de madrugada e te avisa no WhatsApp.</p>';
+  if(d.custo){var m=d.custo.moeda||'USD';
+    document.getElementById('saldo').textContent=m+' '+(typeof d.custo.saldo=='number'?d.custo.saldo.toFixed(2):d.custo.saldo);
+    document.getElementById('cmes').textContent=m+' '+Number(d.custo.mes).toFixed(2);
+    document.getElementById('cmsg').textContent=m+' '+Number(d.custo.por_msg).toFixed(3);
+    document.getElementById('cdia').textContent=m+' '+Number(d.custo.por_dia).toFixed(2);
+    var saldoN=Number(d.custo.saldo)||0,dias=d.custo.por_dia>0?Math.floor(saldoN/d.custo.por_dia):99;
+    document.getElementById('cwarn').textContent=dias<5?('⚠️ dá pra ~'+dias+' dias no ritmo de hoje — recarregue'):'';
+  }
+  var nr=d.nao_receberam||[];
+  document.getElementById('naoreceb').innerHTML=nr.length?nr.map(x=>'<div>'+h((x.nome||'?').split(" ").slice(0,2).join(" "))+(x.cidade?' · '+h(x.cidade):'')+'</div>').join(''):'Todos os disparos chegaram. 🎉';
   var ci=document.getElementById('cientista');
   if(d.cientista&&d.cientista.melhorias&&d.cientista.melhorias.length)ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2>'+d.cientista.melhorias.map(m=>'<div style="margin:6px 0;padding-left:16px;border-left:3px solid var(--terra)">'+h(m)+'</div>').join('');
   else ci.innerHTML='<h2>🔬 O que o Cientista aprendeu</h2><p class="mut">O Cientista fecha o dia no fim da tarde e coloca as 2 melhorias aqui.</p>';
