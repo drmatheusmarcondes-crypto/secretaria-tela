@@ -1,0 +1,77 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Smile — Painel</title>
+<style>
+  :root{--verde:#1f4d3f;--verde2:#2c6b56;--terra:#c8663f;--terra2:#e88a5a;--bg:#0d1714;--card:#16241f;--txt:#eef5f1;--mut:#8fb0a2;--linha:#263d33}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,system-ui,sans-serif;display:flex;flex-direction:column}
+  /* login */
+  #login{max-width:400px;margin:60px auto;background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:22px}
+  #login h1{font-size:20px;color:var(--terra2)}
+  #login p{color:var(--mut);font-size:13px;margin:10px 0}
+  #login input{width:100%;padding:13px;border:1.5px solid var(--linha);background:#0d1714;color:#fff;border-radius:12px;font-size:16px;margin-bottom:10px}
+  #login button{width:100%;padding:14px;border:0;border-radius:12px;background:var(--verde2);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+  #erro{color:var(--terra2);margin-top:8px;font-size:13px}
+  /* app */
+  #app{display:none;flex-direction:column;height:100%}
+  header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#12211b;border-bottom:1px solid var(--linha);flex-shrink:0}
+  .tab{flex:1;text-align:center;padding:11px;border-radius:10px;font-weight:700;cursor:pointer;color:var(--mut);background:transparent;border:0;font-size:15px}
+  .tab.on{color:#fff}
+  .tab.bio.on{background:var(--verde2)} .tab.disp.on{background:var(--terra)}
+  #sair{padding:9px 12px;border:0;border-radius:10px;background:#22160f;color:var(--mut);cursor:pointer;font-size:13px}
+  .frames{flex:1;position:relative;min-height:0}
+  iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+</style>
+
+<div id="login">
+  <h1>🦷 Smile</h1>
+  <p>Entra com seu e-mail.</p>
+  <input id="email" type="email" placeholder="seu e-mail" autocomplete="username">
+  <input id="senha" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
+  <button onclick="entrar()">Entrar</button>
+  <p id="erro"></p>
+</div>
+
+<div id="app">
+  <header>
+    <button class="tab bio" id="tbio" onclick="aba('bio')">🌱 Bio</button>
+    <button class="tab disp on" id="tdisp" onclick="aba('disp')">🚀 Disparo</button>
+    <button id="sair" onclick="sair()">sair</button>
+  </header>
+  <div class="frames">
+    <iframe id="fdisp"></iframe>
+    <iframe id="fbio"></iframe>
+  </div>
+</div>
+
+<script>
+var SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',carregou=false;
+function aba(q){
+  document.getElementById('fbio').style.display = q==='bio'?'block':'none';
+  document.getElementById('fdisp').style.display = q==='disp'?'block':'none';
+  document.getElementById('tbio').className='tab bio'+(q==='bio'?' on':'');
+  document.getElementById('tdisp').className='tab disp'+(q==='disp'?' on':'');
+}
+function mostrarApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  if(!carregou){var t=encodeURIComponent(localStorage.getItem('smile_tok')||''),rt=encodeURIComponent(localStorage.getItem('smile_rt')||''),v='v='+(window.performance&&performance.now?Math.floor(performance.now()):new Date().getTime());document.getElementById('fdisp').src='./disparo.html?'+v+'#tok='+t+'&rt='+rt;document.getElementById('fbio').src='./bio.html?'+v+'#tok='+t+'&rt='+rt;carregou=true;}
+  aba('disp');
+}
+async function entrar(){
+  var email=(document.getElementById('email').value||'').trim().toLowerCase();
+  var pw=document.getElementById('senha').value;var err=document.getElementById('erro');err.textContent='entrando...';
+  try{
+    var r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({email:email,password:pw})});
+    var d=await r.json();
+    if(!r.ok||!d.access_token){err.textContent='e-mail ou senha incorretos';return;}
+    localStorage.setItem('smile_tok',d.access_token);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);
+    mostrarApp();
+  }catch(e){err.textContent='erro ao entrar, tenta de novo';}
+}
+function sair(){localStorage.removeItem('smile_tok');localStorage.removeItem('smile_rt');location.reload();}
+if(localStorage.getItem('smile_tok'))mostrarApp();
+</script>
