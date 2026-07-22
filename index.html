@@ -71,6 +71,30 @@
   .btn-kill:active{transform:translateY(2px);box-shadow:0 4px 10px rgba(0,0,0,.7), inset 0 -3px 8px rgba(0,0,0,.5)}
   .btn-kill span{color:#fff;font-weight:900;font-size:19px;letter-spacing:2px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
   .killzona .kd{font-size:11.5px;letter-spacing:2px;color:#c98b83;font-weight:700}
+  /* ===== métricas (painel embaixo do volante, mesmo acabamento) ===== */
+  .met{margin-top:16px}
+  .mtit{font-size:12px;letter-spacing:4px;color:#8fae8b;font-weight:800;text-align:center;margin-bottom:14px}
+  .gz{margin-bottom:12px}
+  .gt{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;letter-spacing:2px;color:#9db8ab;font-weight:800;margin-bottom:5px}
+  .gt b{font-size:16px;color:#eafff3}
+  .gt i{font-style:normal;color:#5e6f67;font-size:11px;letter-spacing:1px}
+  .gauge{position:relative;height:16px;border-radius:9px;background:#0a100d;border:1px solid #1b2b23;box-shadow:inset 0 0 8px rgba(0,0,0,.8);overflow:hidden}
+  .gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:9px;transition:.5s;width:0}
+  .gauge .fill.ok{background:linear-gradient(90deg,#1d9a5c,#49e896);box-shadow:0 0 12px rgba(61,220,132,.5)}
+  .gauge .fill.quase{background:linear-gradient(90deg,#b97a1e,#ffcf4d);box-shadow:0 0 10px rgba(255,207,77,.4)}
+  .gauge .fill.longe{background:linear-gradient(90deg,#8f150c,#ff5a4d);box-shadow:0 0 10px rgba(255,90,77,.4)}
+  .gauge .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:#eafff3;opacity:.75;box-shadow:0 0 6px rgba(255,255,255,.6)}
+  .gnota{font-size:11px;color:#5e6f67;letter-spacing:1px;margin-top:4px;text-align:right}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin-top:16px}
+  .mcard{background:radial-gradient(120% 130% at 50% 20%,#0c1512 0%,#070b09 80%);border:1px solid #1b2b23;border-radius:14px;padding:12px 13px;box-shadow:inset 0 0 22px rgba(0,0,0,.85)}
+  .mcard h3{font-size:13px;letter-spacing:3px;color:#cfe9dc;display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .mcard h3 .on-dot{width:9px;height:9px;border-radius:50%;background:#233029}
+  .mcard h3 .on-dot.on{background:#3ddc84;box-shadow:0 0 8px #3ddc84}
+  .mrow{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:#79a08f;padding:3.5px 0;border-bottom:1px dashed #12241c}
+  .mrow:last-child{border-bottom:0}
+  .mrow b{color:#eafff3;font-size:14.5px;font-variant-numeric:tabular-nums}
+  .mrow .pc{font-size:11px;color:#5fd39b;margin-left:5px}
+  .mrow .pc.ruim{color:#ff9d94}
   /* rádio */
   .radio{width:min(720px,97vw);margin-top:16px;background:linear-gradient(180deg,#141917,#0c0f0e);border:1px solid #232b29;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px}
   .radio .rl{font-size:10px;letter-spacing:2px;color:#ff6b3d;text-transform:uppercase;font-weight:800;white-space:nowrap}
@@ -139,6 +163,20 @@
     </div>
   </div>
 
+  <div class="painel met">
+    <div class="mtit">📊 MÉTRICAS DOS MOTORES</div>
+    <div class="gz">
+      <div class="gt"><span>AGENDAMENTO <b id="g-ag-v">—</b></span><i>META 50%</i></div>
+      <div class="gauge"><div class="fill" id="g-ag-f"></div><div class="tick" style="left:50%"></div></div>
+    </div>
+    <div class="gz">
+      <div class="gt"><span>COMPARECIMENTO <b id="g-cp-v">—</b></span><i>META 40%</i></div>
+      <div class="gauge"><div class="fill" id="g-cp-f"></div><div class="tick" style="left:40%"></div></div>
+      <div class="gnota" id="g-cp-nota"></div>
+    </div>
+    <div class="mgrid" id="mgrid"></div>
+  </div>
+
   <div class="radio">
     <span class="rl">📻 Rádio</span>
     <button class="mic" id="mic" onclick="gravar()" title="segura não — só clica, fala e clica de novo">🎙️</button>
@@ -196,6 +234,48 @@ function pinta(e){
   if(s.length)document.getElementById('sub').innerHTML=s.join('');
   var c=document.getElementById('conn');
   if(typeof e.webhook_ok!=='undefined')c.innerHTML='· FACEBOOK '+(e.webhook_ok?'<b style="color:#5fd39b">ON</b>':'<b style="color:#e88a5a">OFF</b>');
+  pintaMetricas(e);
+}
+function pct(n,d){return d>0?Math.round(100*n/d):0}
+function corMeta(p,meta){return p>=meta?'ok':(p>=meta*0.6?'quase':'longe')}
+function gauge(fid,vid,p,meta){var f=document.getElementById(fid);f.style.width=Math.min(p,100)+'%';f.className='fill '+corMeta(p,meta);document.getElementById(vid).textContent=p+'%'}
+function linha(rot,val,p,meta){
+  var pc='';
+  if(typeof p!=='undefined')pc=' <span class="pc'+(typeof meta!=='undefined'&&p<meta?' ruim':'')+'">'+p+'%</span>';
+  return '<div class="mrow"><span>'+rot+'</span><span><b>'+val+'</b>'+pc+'</span></div>';
+}
+function pintaMetricas(e){
+  var b=e.bio,f=e.forms,d=e.disparo;
+  if(!b||typeof b.chegaram==='undefined'||!f||!d)return;
+  // consolidado sobre leads TRABALHADOS: bio (a Bia atende todos) + forms abordados
+  // pela máquina + quem respondeu ao disparo. Lead de forms capturado com a máquina
+  // desligada fica guardado e não conta contra a meta.
+  var fTrab=(typeof f.trabalhados!=='undefined')?f.trabalhados:(f.recebidos||0);
+  var cheg=(b.chegaram||0)+fTrab+(d.responderam||0);
+  var agen=(b.agendaram||0)+(f.agendaram||0)+(d.agendaram||0);
+  var comp=(b.compareceram||0)+(f.compareceram||0);
+  gauge('g-ag-f','g-ag-v',pct(agen,cheg),50);
+  gauge('g-cp-f','g-cp-v',pct(comp,cheg),40);
+  document.getElementById('g-cp-nota').textContent=comp>0?(comp+' compareceram de '+agen+' agendados'):'sem comparecimento marcado ainda — enquanto isso, a métrica que vale é o agendamento';
+  var h='';
+  h+='<div class="mcard"><h3>🌱 BIO <span class="on-dot'+(ESTADO.bio?' on':'')+'"></span></h3>'
+    +linha('Chegaram',b.chegaram)
+    +linha('Conversaram',b.conversaram,pct(b.conversaram,b.chegaram))
+    +linha('Agendaram',b.agendaram,pct(b.agendaram,b.chegaram),50)
+    +linha('Compareceram',b.compareceram,pct(b.compareceram,b.chegaram),40)+'</div>';
+  h+='<div class="mcard"><h3>📋 FORMS <span class="on-dot'+(ESTADO.forms?' on':'')+'"></span></h3>'
+    +linha('Recebidos',f.recebidos)
+    +(typeof f.trabalhados!=='undefined'?linha('Trabalhados',f.trabalhados,pct(f.trabalhados,f.recebidos)):'')
+    +linha('Responderam',f.responderam,pct(f.responderam,fTrab||f.recebidos))
+    +linha('Agendaram',f.agendaram,pct(f.agendaram,fTrab||f.recebidos),50)
+    +linha('Compareceram',f.compareceram,pct(f.compareceram,fTrab||f.recebidos),40)+'</div>';
+  h+='<div class="mcard"><h3>🚀 DISPARO <span class="on-dot'+(ESTADO.disparo?' on':'')+'"></span></h3>'
+    +linha('Base no baú',(d.total||0).toLocaleString('pt-BR'))
+    +linha('Enviados',d.disparados)
+    +linha('Entregues',d.entregues,pct(d.entregues,d.disparados))
+    +linha('Responderam',d.responderam,pct(d.responderam,d.entregues))
+    +linha('Agendaram',d.agendaram)+'</div>';
+  document.getElementById('mgrid').innerHTML=h;
 }
 async function carrega(){try{var e=await api('cockpit');if(e&&e.ok)pinta(e)}catch(_){}}
 
