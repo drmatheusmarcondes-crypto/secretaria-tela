@@ -1,0 +1,157 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<title>Smile — Volante</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:#050706;color:#eef5f1;font:15px/1.5 'Rajdhani','Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%}
+  .hide{display:none!important}
+  /* login */
+  #login{max-width:400px;width:92%;background:#101a16;border:1px solid #223a30;border-radius:16px;padding:24px;margin:auto}
+  #login h1{font-size:22px;color:#e88a5a}
+  #login p{color:#8fb0a2;font-size:13px;margin:10px 0}
+  #login input{width:100%;padding:13px;border:1.5px solid #223a30;background:#0a100d;color:#fff;border-radius:12px;font-size:16px;margin-bottom:10px}
+  #login button{width:100%;padding:14px;border:0;border-radius:12px;background:#2c6b56;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+  #err{color:#e88a5a;margin-top:8px;font-size:13px;min-height:16px}
+  /* cockpit */
+  #app{width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 10px 26px}
+  .badge{font-size:11px;letter-spacing:3px;color:#7d8a86;text-transform:uppercase;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+  .badge b{color:#8fae8b}
+  .badge .sair{color:#7d8a86;background:#160f0a;border:1px solid #2a2019;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;letter-spacing:1px}
+  .stage{position:relative;width:min(940px,98vw);border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.7);user-select:none}
+  .stage img{display:block;width:100%;height:auto}
+  /* display vivo por cima do "14" da imagem */
+  .disp{position:absolute;left:28.5%;top:17.5%;width:39%;height:26.5%;border-radius:10px;
+    background:radial-gradient(120% 120% at 50% 40%,#0c1512 0%,#050a08 75%);
+    box-shadow:inset 0 0 26px rgba(0,0,0,.9), inset 0 0 2px #1f5a44;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+  .disp .num{font-size:min(15vw,120px);font-weight:800;line-height:.9;letter-spacing:2px;
+    color:#eafff3;text-shadow:0 0 18px rgba(61,220,132,.65),0 0 3px #baffdd}
+  .disp .lbl{font-size:min(2.6vw,16px);letter-spacing:5px;color:#5fd39b;margin-top:6px;font-weight:700}
+  /* hotspots (áreas clicáveis por cima das chaves) */
+  .hot{position:absolute;cursor:pointer;border-radius:12px;transition:.15s;z-index:3}
+  .hot:hover{box-shadow:0 0 0 2px rgba(255,255,255,.30),0 0 18px rgba(61,220,132,.4);background:rgba(255,255,255,.04)}
+  .hot.off{background:rgba(4,6,5,.74)!important;box-shadow:inset 0 0 0 2px #ff3b30, inset 0 0 22px rgba(0,0,0,.6)!important}
+  .hot .tag{position:absolute;left:50%;top:-20px;transform:translateX(-50%);white-space:nowrap;
+    font-size:11px;font-weight:800;letter-spacing:1px;color:#ff5a4d;background:#160a09;border:1px solid #ff3b30;border-radius:6px;padding:2px 7px;display:none;pointer-events:none}
+  .hot.off .tag{display:block}
+  .hot.kill:hover{box-shadow:0 0 0 2px rgba(255,90,77,.6),0 0 22px rgba(255,60,48,.5)}
+  /* rádio */
+  .radio{width:min(940px,98vw);margin-top:14px;background:linear-gradient(180deg,#141917,#0c0f0e);border:1px solid #232b29;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+  .radio .rl{font-size:10px;letter-spacing:2px;color:#ff6b3d;text-transform:uppercase;font-weight:800;white-space:nowrap}
+  .radio input{flex:1;background:#0a0d0c;border:1px solid #232b29;border-radius:10px;padding:12px 14px;color:#eef5f1;font-family:inherit;font-size:15px;outline:none}
+  .radio input::placeholder{color:#5a6763}
+  .radio .go{background:#c05b3c;border:none;color:#fff;font-weight:800;border-radius:10px;padding:12px 16px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-family:inherit}
+  .radio .go:disabled{opacity:.5}
+  .resp{width:min(940px,98vw);margin-top:8px;min-height:0}
+  .resp .bub{background:#10201a;border:1px solid #234;border-color:#1f5a44;border-radius:12px;padding:11px 14px;color:#d9f3e6;font-size:14.5px;white-space:pre-wrap}
+  .nav{width:min(940px,98vw);margin-top:14px;display:flex;gap:8px}
+  .nav a{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;color:#cfe;border:1px solid #223a30;background:#0d1714}
+  .nav a.bio{border-color:#2c6b56} .nav a.disp{border-color:#c8663f} .nav a.form{border-color:#4267B2}
+  /* overlay detalhe */
+  #over{position:fixed;inset:0;background:#050706;z-index:50;display:none;flex-direction:column}
+  #over .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0d1714;border-bottom:1px solid #223a30}
+  #over .bar button{background:#22160f;color:#eef5f1;border:1px solid #2a2019;border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700}
+  #over iframe{flex:1;width:100%;border:0}
+</style>
+
+<div id="login">
+  <h1>🏎️ Smile — Volante</h1>
+  <p>Entra com seu e-mail pra assumir o volante.</p>
+  <input id="email" type="email" placeholder="seu e-mail" autocomplete="username">
+  <input id="senha" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
+  <button onclick="entrar()">Entrar</button>
+  <p id="err"></p>
+</div>
+
+<div id="app" class="hide">
+  <div class="badge">SMILE UNIVERSITY · CENTRAL DE COMANDO <span id="conn"></span><span class="sair" onclick="sair()">sair</span></div>
+  <div class="stage">
+    <img src="./volante.png" alt="volante">
+    <div class="disp"><div class="num" id="num">—</div><div class="lbl">REUNIÕES HOJE</div></div>
+    <div class="hot" data-m="bio"     style="left:36.5%;top:54%;width:9.5%;height:20%"   onclick="toggle('bio')"><span class="tag">DESLIGADA</span></div>
+    <div class="hot" data-m="forms"   style="left:48.8%;top:51%;width:9.5%;height:20%"   onclick="toggle('forms')"><span class="tag">DESLIGADA</span></div>
+    <div class="hot" data-m="disparo" style="left:61.3%;top:48.5%;width:9.5%;height:20%" onclick="toggle('disparo')"><span class="tag">DESLIGADA</span></div>
+    <div class="hot kill" style="left:52.6%;top:76%;width:13%;height:17%;border-radius:50%" onclick="kill()"></div>
+  </div>
+  <div class="radio">
+    <span class="rl">📻 Rádio</span>
+    <input id="ri" placeholder="fala com o copiloto: &quot;liga a forms&quot;, &quot;quantas reuniões hoje?&quot;" onkeydown="if(event.key==='Enter')radio()">
+    <button class="go" id="rgo" onclick="radio()">Enviar</button>
+  </div>
+  <div class="resp" id="resp"></div>
+  <div class="nav">
+    <a class="bio"  onclick="abrir('bio')">🌱 Bio</a>
+    <a class="disp" onclick="abrir('disparo')">🚀 Disparo</a>
+    <a class="form" onclick="abrir('forms')">📋 Forms</a>
+  </div>
+</div>
+
+<div id="over">
+  <div class="bar"><button onclick="fechar()">◀ voltar ao volante</button><b id="ovt" style="color:#8fae8b"></b></div>
+  <iframe id="ovf"></iframe>
+</div>
+
+<script>
+var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',
+    SB='https://lyrbgggcqpacekdyeslh.supabase.co',
+    ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',
+    TOKEN='', ESTADO={bio:false,disparo:false,forms:false}, HIST=[], timer=null;
+var LBL={bio:'a Bio',disparo:'o Disparo',forms:'a Forms'};
+
+async function api(a,c){var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(c||{})};
+  var r=await fetch(API+'?acao='+a,o);
+  if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+a,o)}
+  return r.json()}
+async function renova(){var rt=localStorage.getItem('smile_rt');if(!rt)return false;try{var r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({refresh_token:rt})});var d=await r.json();if(d.access_token){TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);return true}}catch(e){}localStorage.removeItem('smile_tok');return false}
+async function entrar(){var email=(document.getElementById('email').value||'').trim().toLowerCase();var pw=document.getElementById('senha').value;var err=document.getElementById('err');err.textContent='entrando...';try{var r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({email:email,password:pw})});var d=await r.json();if(!r.ok||!d.access_token){err.textContent='e-mail ou senha incorretos';return}TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);ligado()}catch(e){err.textContent='erro ao entrar'}}
+function sair(){localStorage.removeItem('smile_tok');localStorage.removeItem('smile_rt');location.reload()}
+function _tokH(){try{var m=/tok=([^&]*)/.exec(location.hash||'');if(m&&m[1]){var t=decodeURIComponent(m[1]);if(t){localStorage.setItem('smile_tok',t);var r=/rt=([^&]*)/.exec(location.hash||'');if(r&&r[1])localStorage.setItem('smile_rt',decodeURIComponent(r[1]));return t}}}catch(e){}return localStorage.getItem('smile_tok')}
+
+function ligado(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');carrega();if(timer)clearInterval(timer);timer=setInterval(carrega,10000)}
+
+function pinta(e){
+  if(typeof e.reunioes_hoje!=='undefined')document.getElementById('num').textContent=e.reunioes_hoje;
+  var m=e.maquinas||e;ESTADO={bio:!!m.bio,disparo:!!m.disparo,forms:!!m.forms};
+  document.querySelectorAll('.hot[data-m]').forEach(function(h){h.classList.toggle('off',!ESTADO[h.dataset.m])});
+  var c=document.getElementById('conn');
+  if(typeof e.webhook_ok!=='undefined')c.innerHTML='· Facebook '+(e.webhook_ok?'<b style="color:#5fd39b">on</b>':'<b style="color:#e88a5a">off</b>');
+}
+async function carrega(){try{var e=await api('cockpit');if(e&&e.ok)pinta(e)}catch(_){}}
+
+async function toggle(m){
+  var novo=!ESTADO[m];
+  if(!novo&&!confirm('Desligar '+LBL[m]+'?'))return;
+  ESTADO[m]=novo;document.querySelector('.hot[data-m="'+m+'"]').classList.toggle('off',!novo); // otimista
+  try{var r=await api('cockpit_switch',{maquina:m,ativo:novo});if(!r||!r.ok){ESTADO[m]=!novo;carrega()}}catch(_){carrega()}
+}
+async function kill(){
+  if(!confirm('BOTÃO KILL — desligar TODAS as máquinas agora?'))return;
+  ['bio','disparo','forms'].forEach(function(m){ESTADO[m]=false;document.querySelector('.hot[data-m="'+m+'"]').classList.add('off')});
+  try{await api('cockpit_kill',{})}catch(_){}
+  bolha('🔴 KILL — desliguei as 3 máquinas.');carrega();
+}
+
+function bolha(t){document.getElementById('resp').innerHTML='<div class="bub">'+t.replace(/</g,'&lt;')+'</div>'}
+async function radio(){
+  var i=document.getElementById('ri'),q=(i.value||'').trim();if(!q)return;
+  var go=document.getElementById('rgo');go.disabled=true;bolha('📻 …');
+  HIST.push({role:'user',content:q});
+  try{var r=await api('copiloto',{mensagens:HIST});
+    if(r&&r.ok){bolha(r.texto||'ok');HIST.push({role:'assistant',content:r.texto||'ok'});if(r.estado)pinta(r.estado)}
+    else bolha('deu erro no rádio, tenta de novo')}
+  catch(_){bolha('deu erro no rádio, tenta de novo')}
+  i.value='';go.disabled=false;
+}
+
+function abrir(m){var t=encodeURIComponent(localStorage.getItem('smile_tok')||''),rt=encodeURIComponent(localStorage.getItem('smile_rt')||''),v='v='+new Date().getTime();
+  var pg={bio:'bio.html',disparo:'disparo.html',forms:'forms.html'}[m];
+  document.getElementById('ovf').src='./'+pg+'?'+v+'#tok='+t+'&rt='+rt;
+  document.getElementById('ovt').textContent={bio:'🌱 Bio',disparo:'🚀 Disparo',forms:'📋 Forms'}[m];
+  document.getElementById('over').style.display='flex';
+}
+function fechar(){document.getElementById('over').style.display='none';document.getElementById('ovf').src='about:blank';carrega()}
+
+var sv=_tokH();if(sv){TOKEN=sv;ligado()}
+</script>
