@@ -1,11 +1,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<title>Smile — Volante</title>
+<title>Smile — Central de Comando</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
-  body{background:#050706;color:#eef5f1;font:15px/1.5 'Rajdhani','Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%}
+  body{background:#050706;color:#eef5f1;font:15px/1.5 'Rajdhani','Segoe UI',system-ui,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100%}
   .hide{display:none!important}
   /* login */
   #login{max-width:400px;width:92%;background:#101a16;border:1px solid #223a30;border-radius:16px;padding:24px;margin:auto}
@@ -14,41 +15,75 @@
   #login input{width:100%;padding:13px;border:1.5px solid #223a30;background:#0a100d;color:#fff;border-radius:12px;font-size:16px;margin-bottom:10px}
   #login button{width:100%;padding:14px;border:0;border-radius:12px;background:#2c6b56;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
   #err{color:#e88a5a;margin-top:8px;font-size:13px;min-height:16px}
-  /* cockpit */
-  #app{width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 10px 26px}
-  .badge{font-size:11px;letter-spacing:3px;color:#7d8a86;text-transform:uppercase;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+  /* app */
+  #app{width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 10px 28px}
+  .badge{font-size:11px;letter-spacing:3px;color:#7d8a86;text-transform:uppercase;margin-bottom:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
   .badge b{color:#8fae8b}
   .badge .sair{color:#7d8a86;background:#160f0a;border:1px solid #2a2019;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;letter-spacing:1px}
-  .stage{position:relative;width:min(940px,98vw);border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.7);user-select:none}
-  .stage img{display:block;width:100%;height:auto}
-  /* display vivo por cima do "14" da imagem */
-  .disp{position:absolute;left:28.5%;top:17.5%;width:39%;height:26.5%;border-radius:10px;
-    background:radial-gradient(120% 120% at 50% 40%,#0c1512 0%,#050a08 75%);
-    box-shadow:inset 0 0 26px rgba(0,0,0,.9), inset 0 0 2px #1f5a44;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
-  .disp .num{font-size:min(15vw,120px);font-weight:800;line-height:.9;letter-spacing:2px;
-    color:#eafff3;text-shadow:0 0 18px rgba(61,220,132,.65),0 0 3px #baffdd}
-  .disp .lbl{font-size:min(2.6vw,16px);letter-spacing:5px;color:#5fd39b;margin-top:6px;font-weight:700}
-  /* hotspots (áreas clicáveis por cima das chaves) */
-  .hot{position:absolute;cursor:pointer;border-radius:12px;transition:.15s;z-index:3}
-  .hot:hover{box-shadow:0 0 0 2px rgba(255,255,255,.30),0 0 18px rgba(61,220,132,.4);background:rgba(255,255,255,.04)}
-  .hot.off{background:rgba(4,6,5,.74)!important;box-shadow:inset 0 0 0 2px #ff3b30, inset 0 0 22px rgba(0,0,0,.6)!important}
-  .hot .tag{position:absolute;left:50%;top:-20px;transform:translateX(-50%);white-space:nowrap;
-    font-size:11px;font-weight:800;letter-spacing:1px;color:#ff5a4d;background:#160a09;border:1px solid #ff3b30;border-radius:6px;padding:2px 7px;display:none;pointer-events:none}
-  .hot.off .tag{display:block}
-  .hot.kill:hover{box-shadow:0 0 0 2px rgba(255,90,77,.6),0 0 22px rgba(255,60,48,.5)}
+  /* ===== o painel (console central do volante) ===== */
+  .painel{width:min(720px,97vw);border-radius:26px;padding:22px 20px 26px;position:relative;
+    background:
+      radial-gradient(140% 100% at 50% 0%, rgba(44,107,86,.16), transparent 55%),
+      repeating-linear-gradient(45deg,#0c1210 0 3px,#0a0e0c 3px 6px),
+      linear-gradient(180deg,#0e1512,#080c0a);
+    border:1px solid #24352c;
+    box-shadow:0 30px 90px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.05), inset 0 -14px 34px rgba(0,0,0,.55)}
+  .parafuso{position:absolute;width:13px;height:13px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#3a4a42,#141a17 70%);box-shadow:inset 0 0 3px #000, 0 1px 1px rgba(255,255,255,.06)}
+  /* rev lights */
+  .leds{display:flex;gap:7px;justify-content:center;margin:2px 0 14px}
+  .led{width:13px;height:13px;border-radius:50%;background:#101512;box-shadow:inset 0 0 4px #000}
+  .led.g.on{background:#3ddc84;box-shadow:0 0 10px #3ddc84,0 0 3px #3ddc84}
+  .led.y.on{background:#ffcf4d;box-shadow:0 0 10px #ffcf4d,0 0 3px #ffcf4d}
+  .led.r.on{background:#ff5a4d;box-shadow:0 0 10px #ff5a4d,0 0 3px #ff5a4d}
+  /* display */
+  .tela{border-radius:16px;padding:16px 14px 14px;text-align:center;
+    background:radial-gradient(120% 130% at 50% 30%,#0c1512 0%,#050a08 78%);
+    border:1px solid #1b2b23;box-shadow:inset 0 0 30px rgba(0,0,0,.92), inset 0 0 2px #1f5a44}
+  .tela .num{font-size:min(24vw,108px);font-weight:800;line-height:.95;letter-spacing:3px;
+    color:#eafff3;text-shadow:0 0 20px rgba(61,220,132,.6),0 0 4px #baffdd;font-variant-numeric:tabular-nums}
+  .tela .lbl{font-size:14px;letter-spacing:6px;color:#5fd39b;margin-top:4px;font-weight:700}
+  .tela .sub{margin-top:10px;padding-top:10px;border-top:1px solid #12241c;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;
+    font-size:12.5px;color:#79a08f;letter-spacing:1px}
+  .tela .sub b{color:#cfe9dc}
+  /* chaves */
+  .chaves{display:flex;justify-content:center;gap:min(5vw,38px);margin:22px 0 8px;flex-wrap:wrap}
+  .mod{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;user-select:none;width:104px}
+  .sw{width:64px;height:104px;border-radius:14px;position:relative;transition:.2s;
+    background:linear-gradient(180deg,#1a221e,#0c100e);
+    border:1px solid #2a3a31;box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 2px 0 rgba(255,255,255,.04)}
+  .sw .on-lbl{position:absolute;top:7px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:2px;color:#57735f;font-weight:800}
+  .sw .knob{position:absolute;left:7px;right:7px;height:42px;border-radius:9px;transition:.22s;top:56px;
+    background:linear-gradient(180deg,#28312c,#131917);box-shadow:0 3px 8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08)}
+  .mod.ligada .sw{border-color:#2f7a54;box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 0 16px rgba(61,220,132,.28)}
+  .mod.ligada .sw .knob{top:24px;background:linear-gradient(180deg,#49e896,#1d9a5c);box-shadow:0 0 18px rgba(61,220,132,.75), inset 0 1px 0 rgba(255,255,255,.35)}
+  .mod .placa{font-size:15px;font-weight:800;letter-spacing:3px;color:#cfe9dc;background:#0b120e;border:1px solid #223a30;border-radius:8px;padding:3px 12px}
+  .mod .st{font-size:12px;font-weight:800;letter-spacing:2px;padding:2px 10px;border-radius:6px}
+  .mod.ligada .st{color:#3ddc84;background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.4);text-shadow:0 0 8px rgba(61,220,132,.6)}
+  .mod.desligada .st{color:#ff5a4d;background:rgba(255,60,48,.07);border:1px solid rgba(255,60,48,.45)}
+  .mod.desligada .placa{color:#6d7d75}
+  .mod:hover .sw{filter:brightness(1.15)}
+  /* KILL */
+  .killzona{display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:14px}
+  .btn-kill{width:92px;height:92px;border-radius:50%;border:0;cursor:pointer;position:relative;
+    background:radial-gradient(circle at 35% 28%,#ff8a7a,#d92c1e 55%,#8f150c 100%);
+    box-shadow:0 8px 20px rgba(0,0,0,.7), 0 0 26px rgba(255,60,48,.35), inset 0 -6px 12px rgba(0,0,0,.45), inset 0 3px 5px rgba(255,255,255,.35)}
+  .btn-kill:active{transform:translateY(2px);box-shadow:0 4px 10px rgba(0,0,0,.7), inset 0 -3px 8px rgba(0,0,0,.5)}
+  .btn-kill span{color:#fff;font-weight:900;font-size:19px;letter-spacing:2px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .killzona .kd{font-size:11.5px;letter-spacing:2px;color:#c98b83;font-weight:700}
   /* rádio */
-  .radio{width:min(940px,98vw);margin-top:14px;background:linear-gradient(180deg,#141917,#0c0f0e);border:1px solid #232b29;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+  .radio{width:min(720px,97vw);margin-top:16px;background:linear-gradient(180deg,#141917,#0c0f0e);border:1px solid #232b29;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px}
   .radio .rl{font-size:10px;letter-spacing:2px;color:#ff6b3d;text-transform:uppercase;font-weight:800;white-space:nowrap}
-  .radio input{flex:1;background:#0a0d0c;border:1px solid #232b29;border-radius:10px;padding:12px 14px;color:#eef5f1;font-family:inherit;font-size:15px;outline:none}
+  .radio input{flex:1;min-width:0;background:#0a0d0c;border:1px solid #232b29;border-radius:10px;padding:12px 14px;color:#eef5f1;font-family:inherit;font-size:15px;outline:none}
   .radio input::placeholder{color:#5a6763}
   .radio .go{background:#c05b3c;border:none;color:#fff;font-weight:800;border-radius:10px;padding:12px 16px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-family:inherit}
   .radio .go:disabled{opacity:.5}
-  .resp{width:min(940px,98vw);margin-top:8px;min-height:0}
-  .resp .bub{background:#10201a;border:1px solid #234;border-color:#1f5a44;border-radius:12px;padding:11px 14px;color:#d9f3e6;font-size:14.5px;white-space:pre-wrap}
-  .nav{width:min(940px,98vw);margin-top:14px;display:flex;gap:8px}
-  .nav a{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;color:#cfe;border:1px solid #223a30;background:#0d1714}
-  .nav a.bio{border-color:#2c6b56} .nav a.disp{border-color:#c8663f} .nav a.form{border-color:#4267B2}
+  .resp{width:min(720px,97vw);margin-top:8px}
+  .resp .bub{background:#10201a;border:1px solid #1f5a44;border-radius:12px;padding:11px 14px;color:#d9f3e6;font-size:14.5px;white-space:pre-wrap}
+  /* nav */
+  .nv{width:min(720px,97vw);margin-top:14px;display:flex;gap:8px}
+  .nv a{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;color:#cfe9dc;border:1px solid #223a30;background:#0d1714}
+  .nv a.n-bio{border-color:#2c6b56} .nv a.n-disp{border-color:#c8663f} .nv a.n-form{border-color:#4267B2}
   /* overlay detalhe */
   #over{position:fixed;inset:0;background:#050706;z-index:50;display:none;flex-direction:column}
   #over .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0d1714;border-bottom:1px solid #223a30}
@@ -57,7 +92,7 @@
 </style>
 
 <div id="login">
-  <h1>🏎️ Smile — Volante</h1>
+  <h1>🏎️ Smile — Central de Comando</h1>
   <p>Entra com seu e-mail pra assumir o volante.</p>
   <input id="email" type="email" placeholder="seu e-mail" autocomplete="username">
   <input id="senha" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
@@ -67,24 +102,51 @@
 
 <div id="app" class="hide">
   <div class="badge">SMILE UNIVERSITY · CENTRAL DE COMANDO <span id="conn"></span><span class="sair" onclick="sair()">sair</span></div>
-  <div class="stage">
-    <img src="./volante.png" alt="volante">
-    <div class="disp"><div class="num" id="num">—</div><div class="lbl">REUNIÕES HOJE</div></div>
-    <div class="hot" data-m="bio"     style="left:36.5%;top:54%;width:9.5%;height:20%"   onclick="toggle('bio')"><span class="tag">DESLIGADA</span></div>
-    <div class="hot" data-m="forms"   style="left:48.8%;top:51%;width:9.5%;height:20%"   onclick="toggle('forms')"><span class="tag">DESLIGADA</span></div>
-    <div class="hot" data-m="disparo" style="left:61.3%;top:48.5%;width:9.5%;height:20%" onclick="toggle('disparo')"><span class="tag">DESLIGADA</span></div>
-    <div class="hot kill" style="left:52.6%;top:76%;width:13%;height:17%;border-radius:50%" onclick="kill()"></div>
+
+  <div class="painel">
+    <i class="parafuso" style="top:12px;left:14px"></i><i class="parafuso" style="top:12px;right:14px"></i>
+    <i class="parafuso" style="bottom:12px;left:14px"></i><i class="parafuso" style="bottom:12px;right:14px"></i>
+
+    <div class="leds" id="leds"></div>
+
+    <div class="tela">
+      <div class="num" id="num">—</div>
+      <div class="lbl">REUNIÕES HOJE</div>
+      <div class="sub" id="sub"></div>
+    </div>
+
+    <div class="chaves">
+      <div class="mod desligada" id="m-bio" onclick="toggle('bio')">
+        <div class="sw"><span class="on-lbl">ON</span><span class="knob"></span></div>
+        <span class="placa">BIO</span><span class="st">—</span>
+      </div>
+      <div class="mod desligada" id="m-forms" onclick="toggle('forms')">
+        <div class="sw"><span class="on-lbl">ON</span><span class="knob"></span></div>
+        <span class="placa">FORMS</span><span class="st">—</span>
+      </div>
+      <div class="mod desligada" id="m-disparo" onclick="toggle('disparo')">
+        <div class="sw"><span class="on-lbl">ON</span><span class="knob"></span></div>
+        <span class="placa">DISPARO</span><span class="st">—</span>
+      </div>
+    </div>
+
+    <div class="killzona">
+      <button class="btn-kill" onclick="kill()"><span>KILL</span></button>
+      <span class="kd">DESLIGA TUDO</span>
+    </div>
   </div>
+
   <div class="radio">
     <span class="rl">📻 Rádio</span>
     <input id="ri" placeholder="fala com o copiloto: &quot;liga a forms&quot;, &quot;quantas reuniões hoje?&quot;" onkeydown="if(event.key==='Enter')radio()">
     <button class="go" id="rgo" onclick="radio()">Enviar</button>
   </div>
   <div class="resp" id="resp"></div>
-  <div class="nav">
-    <a class="bio"  onclick="abrir('bio')">🌱 Bio</a>
-    <a class="disp" onclick="abrir('disparo')">🚀 Disparo</a>
-    <a class="form" onclick="abrir('forms')">📋 Forms</a>
+
+  <div class="nv">
+    <a class="n-bio"  onclick="abrir('bio')">🌱 Bio</a>
+    <a class="n-disp" onclick="abrir('disparo')">🚀 Disparo</a>
+    <a class="n-form" onclick="abrir('forms')">📋 Forms</a>
   </div>
 </div>
 
@@ -100,6 +162,10 @@ var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',
     TOKEN='', ESTADO={bio:false,disparo:false,forms:false}, HIST=[], timer=null;
 var LBL={bio:'a Bio',disparo:'o Disparo',forms:'a Forms'};
 
+// rev lights: 8 verdes, 4 amarelos, 3 vermelhos — acende 1 por reunião do dia
+(function(){var h='';for(var i=0;i<15;i++){var c=i<8?'g':(i<12?'y':'r');h+='<span class="led '+c+'" id="led'+i+'"></span>'}document.getElementById('leds').innerHTML=h})();
+function pintaLeds(n){for(var i=0;i<15;i++){document.getElementById('led'+i).classList.toggle('on',i<n)}}
+
 async function api(a,c){var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(c||{})};
   var r=await fetch(API+'?acao='+a,o);
   if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+a,o)}
@@ -111,24 +177,33 @@ function _tokH(){try{var m=/tok=([^&]*)/.exec(location.hash||'');if(m&&m[1]){var
 
 function ligado(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');carrega();if(timer)clearInterval(timer);timer=setInterval(carrega,10000)}
 
+function pintaChave(m,on){var el=document.getElementById('m-'+m);if(!el)return;
+  el.className='mod '+(on?'ligada':'desligada');
+  el.querySelector('.st').textContent=on?'LIGADA':'DESLIGADA'}
 function pinta(e){
-  if(typeof e.reunioes_hoje!=='undefined')document.getElementById('num').textContent=e.reunioes_hoje;
   var m=e.maquinas||e;ESTADO={bio:!!m.bio,disparo:!!m.disparo,forms:!!m.forms};
-  document.querySelectorAll('.hot[data-m]').forEach(function(h){h.classList.toggle('off',!ESTADO[h.dataset.m])});
+  pintaChave('bio',ESTADO.bio);pintaChave('forms',ESTADO.forms);pintaChave('disparo',ESTADO.disparo);
+  if(typeof e.reunioes_hoje!=='undefined'){document.getElementById('num').textContent=e.reunioes_hoje;pintaLeds(e.reunioes_hoje)}
+  var s=[];
+  if(e.bio)s.push('<span>🌱 Bio <b>'+(e.bio.chegaram||0)+'</b> leads</span>');
+  if(e.forms)s.push('<span>📋 Forms <b>'+(e.forms.recebidos||0)+'</b> leads</span>');
+  if(e.disparo)s.push('<span>🚀 Disparo <b>'+(e.disparo.disparados||0)+'</b> enviados</span>');
+  if(typeof e.ligacoes_24h!=='undefined')s.push('<span>📞 <b>'+e.ligacoes_24h+'</b> ligações 24h</span>');
+  if(s.length)document.getElementById('sub').innerHTML=s.join('');
   var c=document.getElementById('conn');
-  if(typeof e.webhook_ok!=='undefined')c.innerHTML='· Facebook '+(e.webhook_ok?'<b style="color:#5fd39b">on</b>':'<b style="color:#e88a5a">off</b>');
+  if(typeof e.webhook_ok!=='undefined')c.innerHTML='· FACEBOOK '+(e.webhook_ok?'<b style="color:#5fd39b">ON</b>':'<b style="color:#e88a5a">OFF</b>');
 }
 async function carrega(){try{var e=await api('cockpit');if(e&&e.ok)pinta(e)}catch(_){}}
 
 async function toggle(m){
   var novo=!ESTADO[m];
   if(!novo&&!confirm('Desligar '+LBL[m]+'?'))return;
-  ESTADO[m]=novo;document.querySelector('.hot[data-m="'+m+'"]').classList.toggle('off',!novo); // otimista
+  ESTADO[m]=novo;pintaChave(m,novo); // otimista
   try{var r=await api('cockpit_switch',{maquina:m,ativo:novo});if(!r||!r.ok){ESTADO[m]=!novo;carrega()}}catch(_){carrega()}
 }
 async function kill(){
   if(!confirm('BOTÃO KILL — desligar TODAS as máquinas agora?'))return;
-  ['bio','disparo','forms'].forEach(function(m){ESTADO[m]=false;document.querySelector('.hot[data-m="'+m+'"]').classList.add('off')});
+  ['bio','disparo','forms'].forEach(function(m){ESTADO[m]=false;pintaChave(m,false)});
   try{await api('cockpit_kill',{})}catch(_){}
   bolha('🔴 KILL — desliguei as 3 máquinas.');carrega();
 }
