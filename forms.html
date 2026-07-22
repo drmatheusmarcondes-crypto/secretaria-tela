@@ -1,0 +1,120 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Smile — Máquina Forms</title>
+<style>
+  :root{--verde:#1f4d3f;--verde2:#2c6b56;--terra:#c8663f;--terra2:#e88a5a;--bg:#0d1714;--card:#16241f;--card2:#1b2e27;--txt:#eef5f1;--mut:#8fb0a2;--linha:#263d33;--fb:#4267B2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,system-ui,sans-serif;padding:16px;max-width:960px;margin:0 auto}
+  h1{font-size:20px;color:var(--terra2);display:flex;align-items:center;gap:8px}
+  .mut{color:var(--mut);font-size:13px}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+  .card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--linha)}
+  .hero{background:linear-gradient(135deg,#1b3a30,#16241f);text-align:center;padding:22px}
+  .big{font-size:52px;font-weight:800;color:var(--terra2);line-height:1;margin:6px 0}
+  .label{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--mut)}
+  .funil{display:flex;gap:8px;align-items:stretch}
+  .fstep{flex:1;background:var(--card2);border-radius:12px;padding:12px 8px;text-align:center}
+  .fstep b{font-size:26px;display:block}.fstep span{font-size:11px;color:var(--mut)}.fstep .pct{font-size:10px;color:var(--terra2);font-weight:700}
+  .arrow{align-self:center;color:var(--mut)}
+  @media(max-width:640px){.funil{flex-wrap:wrap}.fstep{min-width:28%}.arrow{display:none}}
+  .pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700}
+  .on{background:#1c3b2e;color:#7fe0a8}.off{background:#4a1f1a;color:#f08a7a}
+  button{background:var(--verde2);color:#fff;border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;font-size:14px}
+  .kill{background:var(--terra)}
+  .bt{display:flex;gap:8px}.btc{flex:1;background:var(--card2);border-radius:12px;padding:12px;text-align:center}
+  .btc b{font-size:24px;display:block;color:var(--terra2)}.btc span{font-size:12px;color:var(--mut)}
+  .conv{padding:12px;border-bottom:1px solid var(--linha);cursor:pointer;border-radius:8px}.conv:active{background:#1e332b}
+  .conv .nm{color:var(--terra2);font-weight:700}.conv .meta{font-size:12px;color:var(--mut)}.conv .last{font-size:13px;color:#c5d8cf;margin-top:3px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.dg{background:#7fe0a8}.do{background:#f0c674}
+  input[type=password],input[type=email]{background:#0d1714;border:1px solid var(--linha);color:#fff;border-radius:10px;padding:11px;width:100%;font-size:15px}
+  #navtabs{display:flex;gap:8px;background:#12211b;padding:6px;border-radius:12px;margin-bottom:8px}
+  #navtabs a,#navtabs span{flex:1;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;color:var(--mut)}
+  #navtabs .at{background:var(--fb);color:#fff}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9;padding:12px}
+  .fone{background:#0b141a;border-radius:28px;overflow:hidden;border:4px solid #223039;display:flex;flex-direction:column;height:86vh;max-height:780px;max-width:420px;width:100%}
+  .fone-top{background:#202c33;padding:11px 12px;display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .fone-av{width:38px;height:38px;border-radius:50%;background:#c8663f;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0}
+  .fone-nome{font-weight:600;color:#e9edef}.fone-num{font-size:12px;color:#8696a0}.fone-num a{color:#53bdeb;text-decoration:none;font-weight:600}
+  .fone-body{flex:1;overflow-y:auto;padding:12px 10px;background:#0b141a;display:flex;flex-direction:column}
+  .wb{max-width:82%;padding:6px 10px 5px;border-radius:9px;margin:3px 0;font-size:13.5px;line-height:1.42;white-space:pre-wrap}
+  .wb.rx{background:#202c33;align-self:flex-start;border-top-left-radius:2px}.wb.tx{background:#005c4b;align-self:flex-end;border-top-right-radius:2px}
+  .hide{display:none}h2{font-size:14px;color:var(--mut);margin-bottom:10px;font-weight:600}
+</style>
+
+<div id="login" class="card" style="max-width:400px;margin:60px auto">
+  <h1>🦷 Smile — Forms</h1>
+  <p class="mut" style="margin:10px 0">Entra com seu e-mail.</p>
+  <input id="email" type="email" placeholder="seu e-mail" autocomplete="username" style="margin-bottom:8px">
+  <input id="senha" type="password" placeholder="senha" onkeydown="if(event.key==='Enter')entrar()">
+  <button onclick="entrar()" style="margin-top:12px;width:100%">Entrar</button>
+  <p id="err" style="color:var(--terra2);margin-top:8px"></p>
+</div>
+
+<div id="app" class="hide">
+  <div id="navtabs">
+    <a href="./bio.html">🌱 Bio</a><a href="./disparo.html">🚀 Disparo</a><span class="at">📋 Forms</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h1>📋 Máquina de Forms</h1>
+    <button id="kill" class="kill" onclick="toggle()">…</button>
+  </div>
+
+  <div class="grid g2">
+    <div class="card hero"><div class="label">Reuniões agendadas</div><div class="big" id="agendaram">0</div><div class="mut">o que importa no fim</div></div>
+    <div class="card">
+      <div class="label">Conexão com o Facebook</div>
+      <div style="margin-top:10px"><span id="webhook" class="pill">…</span></div>
+      <p class="mut" style="margin-top:10px">O Facebook empurra cada lead do formulário na hora. A máquina dispara mensagem + entra na cadência.</p>
+      <div class="mut" style="margin-top:6px">recebidos hoje: <b id="hoje">0</b></div>
+    </div>
+  </div>
+
+  <div class="card"><h2>Funil dos forms</h2><div class="funil" id="funil"></div></div>
+
+  <div class="card">
+    <h2>Qual dor eles clicaram</h2>
+    <div class="bt">
+      <div class="btc"><b id="b_pac">0</b><span>Poucos pacientes<br>(dor de fluxo)</span></div>
+      <div class="btc"><b id="b_fec">0</b><span>Poucos fechando<br>(dor mais cara)</span></div>
+      <div class="btc"><b id="b_out">0</b><span>Outra coisa</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💬 Quem clicou e tá conversando <span id="qtd" class="mut" style="font-weight:400"></span></h2>
+    <div id="conversas"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="fone">
+  <div class="fone-top"><button onclick="fechar()" style="background:transparent;font-size:22px;color:#aebac1;padding:2px 6px">‹</button>
+    <div class="fone-av" id="mav">?</div><div style="flex:1;min-width:0"><div class="fone-nome" id="mnome">—</div><div class="fone-num" id="mnum"></div></div></div>
+  <div class="fone-body" id="mmsgs"></div>
+</div></div>
+
+<script>
+var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',TOKEN='',ATIVO=false;
+function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+async function api(a,c){var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(c||{})};var r=await fetch(API+'?acao='+a,o);if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+a,o)}return r.json()}
+async function renova(){var rt=localStorage.getItem('smile_rt');if(!rt)return false;try{var r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({refresh_token:rt})});var d=await r.json();if(d.access_token){TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);return true}}catch(e){}localStorage.removeItem('smile_tok');return false}
+async function entrar(){var email=(document.getElementById('email').value||'').trim().toLowerCase();var pw=document.getElementById('senha').value;var err=document.getElementById('err');err.textContent='entrando...';try{var r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({email:email,password:pw})});var d=await r.json();if(!r.ok||!d.access_token){err.textContent='e-mail ou senha incorretos';return}TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}catch(e){err.textContent='erro ao entrar'}}
+var F=[['recebidos','recebidos'],['responderam','responderam'],['agendaram','agendaram']];
+async function carregar(){var d=await api('forms');if(!d||!d.ok)return;
+  document.getElementById('agendaram').textContent=d.funil.agendaram;
+  document.getElementById('hoje').textContent=d.volume.hoje;
+  ATIVO=d.volume.ativo;var k=document.getElementById('kill');k.textContent=ATIVO?'🟢 Ligada — desligar':'⚪ Desligada — ligar';k.className=ATIVO?'kill':'';
+  var wb=document.getElementById('webhook');if(d.webhook_ok){wb.textContent='🔗 Conectado ao Facebook';wb.className='pill on'}else{wb.textContent='⚠️ Falta a chave do Facebook';wb.className='pill off'}
+  var f=d.funil,r=f.recebidos||1;
+  document.getElementById('funil').innerHTML=F.map(function(s,i){var v=f[s[0]]||0;var pct=Math.round(v/r*100);return (i>0?'<span class="arrow">→</span>':'')+'<div class="fstep"><b>'+v+'</b><span>'+s[1]+'</span>'+(i>0?'<div class="pct">'+pct+'%</div>':'')+'</div>'}).join('');
+  document.getElementById('b_pac').textContent=d.por_botao.pacientes;document.getElementById('b_fec').textContent=d.por_botao.fechando;document.getElementById('b_out').textContent=d.por_botao.outra;
+  document.getElementById('conversas').innerHTML=(d.conversas||[]).map(function(c){return '<div class="conv" onclick="ver(\''+c.id+'\')"><span class="dot '+(c.quem=='lead'?'do':'dg')+'"></span><span class="nm">'+h((c.nome||'?').split(" ")[0])+'</span> <span class="meta">'+h(c.especialidade||'')+(c.cidade?' · '+h(c.cidade):'')+' · '+h(c.dor_botao||'')+'</span>'+(c.estado=='agendou'?' <span style="color:#7fe0a8;font-weight:700">✓ agendou</span>':'')+'<div class="last">'+(c.quem=='lead'?'💬 ':'🤖 ')+h((c.ultima||'').slice(0,70))+'</div></div>'}).join('')||'<p class="mut">Ninguém respondeu ainda. Quando um lead do form clicar num botão, aparece aqui.</p>';
+}
+async function toggle(){if(ATIVO&&!confirm('Desligar a Máquina de Forms? Novos leads do Facebook param de receber.'))return;if(!ATIVO&&!confirm('Ligar a Máquina de Forms? Cada lead novo do Facebook vai receber mensagem + entrar na cadência.'))return;var r=await api('forms_switch',{ativo:!ATIVO});if(r&&r.ok){ATIVO=r.ativo;carregar()}}
+async function ver(id){document.getElementById('modal').style.display='flex';var d=await api('forms_conversa',{id});var l=d.lead||{};var nome=l.nome||'?';document.getElementById('mnome').textContent=nome;document.getElementById('mav').textContent=(nome.trim()[0]||'?').toUpperCase();var tel=(l.telefone||'').replace(/[^0-9]/g,'');document.getElementById('mnum').innerHTML=tel?('<a href="https://wa.me/'+tel+'" target="_blank">'+h(l.telefone)+' · abrir no WhatsApp</a>'):'';document.getElementById('mmsgs').innerHTML=(d.mensagens||[]).map(function(m){return '<div class="wb '+(m.quem=='lead'?'rx':'tx')+'">'+h(m.conteudo)+'</div>'}).join('');var mm=document.getElementById('mmsgs');mm.scrollTop=mm.scrollHeight}
+function fechar(){document.getElementById('modal').style.display='none'}
+async function loop(){await carregar();setInterval(carregar,8000)}
+if(window.self!==window.top){var _nt=document.getElementById('navtabs');if(_nt)_nt.style.display='none'}
+function _tokH(){try{var m=/tok=([^&]*)/.exec(location.hash||'');if(m&&m[1]){var t=decodeURIComponent(m[1]);if(t){localStorage.setItem('smile_tok',t);var r=/rt=([^&]*)/.exec(location.hash||'');if(r&&r[1])localStorage.setItem('smile_rt',decodeURIComponent(r[1]));return t}}}catch(e){}return localStorage.getItem('smile_tok')}
+var sv=_tokH();if(sv){TOKEN=sv;document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');loop()}
+</script>
