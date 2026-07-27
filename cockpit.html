@@ -108,9 +108,9 @@
   .resp{width:min(720px,97vw);margin-top:8px}
   .resp .bub{background:#10201a;border:1px solid #1f5a44;border-radius:12px;padding:11px 14px;color:#d9f3e6;font-size:14.5px;white-space:pre-wrap}
   /* nav */
-  .nv{width:min(720px,97vw);margin-top:14px;display:flex;gap:8px}
-  .nv a{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;color:#cfe9dc;border:1px solid #223a30;background:#0d1714}
-  .nv a.n-bio{border-color:#2c6b56} .nv a.n-disp{border-color:#c8663f} .nv a.n-form{border-color:#4267B2}
+  .nv{width:min(720px,97vw);margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .nv a{flex:1;min-width:120px;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;color:#cfe9dc;border:1px solid #223a30;background:#0d1714}
+  .nv a.n-bio{border-color:#2c6b56} .nv a.n-disp{border-color:#c8663f} .nv a.n-form{border-color:#4267B2} .nv a.n-ana{border-color:#7a5cc8}
   /* overlay detalhe */
   #over{position:fixed;inset:0;background:#050706;z-index:50;display:none;flex-direction:column}
   #over .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0d1714;border-bottom:1px solid #223a30}
@@ -189,7 +189,20 @@
     <a class="n-bio"  onclick="abrir('bio')">🌱 Bio</a>
     <a class="n-disp" onclick="abrir('disparo')">🚀 Disparo</a>
     <a class="n-form" onclick="abrir('forms')">📋 Forms</a>
+    <a class="n-ana"  onclick="abrirAnalise()">🧠 Análise</a>
   </div>
+</div>
+
+<div id="overA" style="position:fixed;inset:0;background:rgba(3,6,5,.92);z-index:60;display:none;flex-direction:column;align-items:center;padding:16px 12px;overflow:auto">
+  <div style="width:min(720px,97vw);display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <b style="color:#8fae8b;letter-spacing:2px">🧠 ANÁLISE DE CONVERSAS</b>
+    <button onclick="document.getElementById('overA').style.display='none'" style="background:#22160f;color:#eef5f1;border:1px solid #2a2019;border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700">✕ fechar</button>
+  </div>
+  <div style="width:min(720px,97vw);display:flex;gap:8px;margin-bottom:12px">
+    <button id="ana-gerar" onclick="gerarAnalise()" style="flex:1;background:#2c6b56;color:#fff;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer">🔄 Gerar agora</button>
+    <button id="ana-zap" onclick="toggleZap()" style="flex:1;background:#0d1714;color:#cfe9dc;border:1px solid #223a30;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">📲 zap: —</button>
+  </div>
+  <div id="ana-corpo" style="width:min(720px,97vw);background:#0b120e;border:1px solid #1b2b23;border-radius:14px;padding:16px;color:#d9f3e6;font-size:14.5px;white-space:pre-wrap;line-height:1.6">carregando…</div>
 </div>
 
 <div id="over">
@@ -339,6 +352,32 @@ function abrir(m){var t=encodeURIComponent(localStorage.getItem('smile_tok')||''
   document.getElementById('over').style.display='flex';
 }
 function fechar(){document.getElementById('over').style.display='none';document.getElementById('ovf').src='about:blank';carrega()}
+
+// ===== ANÁLISE de conversas =====
+var ZAP=null;
+function mdWhats(t){return (t||'').replace(/</g,'&lt;').replace(/\*(.+?)\*/g,'<b>$1</b>').replace(/_(.+?)_/g,'<i>$1</i>')}
+async function abrirAnalise(){
+  document.getElementById('overA').style.display='flex';
+  document.getElementById('ana-corpo').innerHTML='carregando…';
+  try{var r=await api('analista');
+    if(r&&r.ok&&r.relatorio){
+      var when=new Date(r.relatorio.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      document.getElementById('ana-corpo').innerHTML='<div style="color:#5e6f67;font-size:12px;margin-bottom:10px">último: '+when+'</div>'+mdWhats(r.relatorio.texto);
+    } else document.getElementById('ana-corpo').innerHTML='Ainda não gerei nenhuma análise. Clica em "Gerar agora".';
+    ZAP=r?r.zap_ativo:null;document.getElementById('ana-zap').textContent='📲 zap: '+(ZAP?'ligado':'desligado');
+  }catch(e){document.getElementById('ana-corpo').innerHTML='deu erro ao carregar'}
+}
+async function gerarAnalise(){
+  var b=document.getElementById('ana-gerar');b.disabled=true;b.textContent='🔄 analisando…';
+  document.getElementById('ana-corpo').innerHTML='lendo as conversas do dia… (uns 20s)';
+  try{var r=await api('analista_rodar',{});
+    document.getElementById('ana-corpo').innerHTML=(r&&r.texto)?mdWhats(r.texto):((r&&r.vazio)?r.texto:'não consegui gerar agora, tenta de novo');
+  }catch(e){document.getElementById('ana-corpo').innerHTML='deu erro, tenta de novo'}
+  b.disabled=false;b.textContent='🔄 Gerar agora';
+}
+async function toggleZap(){
+  var novo=!ZAP;try{var r=await api('analista_zap_switch',{ativo:novo});if(r&&r.ok){ZAP=novo;document.getElementById('ana-zap').textContent='📲 zap: '+(ZAP?'ligado':'desligado')}}catch(e){}
+}
 
 var sv=_tokH();if(sv){TOKEN=sv;ligado()}
 </script>
