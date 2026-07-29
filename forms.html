@@ -94,7 +94,7 @@
 </div></div>
 
 <script>
-var API='https://lyrbgggcqpacekdyeslh.supabase.co/functions/v1/painel-api',SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',TOKEN='',ATIVO=false;
+var API='https://129-121-37-211.sslip.io/functions/v1/painel-api',SB='https://lyrbgggcqpacekdyeslh.supabase.co',ANON='sb_publishable_o_teHfdZVRYm2eGyGnCg1Q_w0fTlHXE',TOKEN='',ATIVO=false;
 function h(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 async function api(a,c){var o={method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(c||{})};var r=await fetch(API+'?acao='+a,o);if(r.status===401&&await renova()){o.headers.Authorization='Bearer '+TOKEN;r=await fetch(API+'?acao='+a,o)}return r.json()}
 async function renova(){var t0=localStorage.getItem('smile_tok');if(t0&&t0!==TOKEN){TOKEN=t0;return true}var rt=localStorage.getItem('smile_rt');if(!rt)return false;try{var r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':ANON,'content-type':'application/json'},body:JSON.stringify({refresh_token:rt})});var d=await r.json();if(d.access_token){TOKEN=d.access_token;localStorage.setItem('smile_tok',TOKEN);if(d.refresh_token)localStorage.setItem('smile_rt',d.refresh_token);return true}}catch(e){}var t1=localStorage.getItem('smile_tok');if(t1&&t1!==TOKEN){TOKEN=t1;return true}return false}
