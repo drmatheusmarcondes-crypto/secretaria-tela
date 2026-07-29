@@ -110,6 +110,24 @@
   .mrow b{color:#eafff3;font-size:14.5px;font-variant-numeric:tabular-nums}
   .mrow .pc{font-size:11px;color:#5fd39b;margin-left:5px}
   .mrow .pc.ruim{color:#ff9d94}
+  /* ===== raio-x do processo ===== */
+  .px-funil{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .px-et{background:#0b120e;border:1px solid #223a30;border-radius:12px;padding:9px 14px;text-align:center;min-width:86px}
+  .px-et b{display:block;font-size:22px;color:#eafff3;font-variant-numeric:tabular-nums}
+  .px-et span{font-size:10.5px;letter-spacing:1px;color:#79a08f;text-transform:uppercase}
+  .px-et small{display:block;font-size:11px;color:#5fd39b;font-weight:700}
+  .px-et.alerta{border-color:rgba(255,60,48,.5);background:rgba(255,60,48,.06)}
+  .px-et.alerta b{color:#ff8a7a} .px-et.alerta small{color:#ff8a7a}
+  .px-seta{color:#22362c;font-size:18px}
+  .px-tit{font-size:11px;letter-spacing:3px;color:#8fae8b;font-weight:800;margin:14px 0 8px;text-align:center}
+  .px-toque{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .px-toque .rot{width:120px;font-size:12px;color:#9db8ab;text-align:right;flex-shrink:0}
+  .px-toque .trilho{flex:1;height:15px;background:#0a100d;border:1px solid #17281f;border-radius:8px;overflow:hidden}
+  .px-toque .barra{height:100%;border-radius:8px;background:linear-gradient(90deg,#1d9a5c,#49e896);min-width:2px;transition:.5s}
+  .px-toque.fraco .barra{background:linear-gradient(90deg,#b97a1e,#ffcf4d)}
+  .px-toque .val{width:88px;font-size:11.5px;color:#79a08f;flex-shrink:0}
+  .px-mini{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:#79a08f}
+  .px-mini b{color:#cfe9dc}
   /* rádio */
   .radio{width:min(720px,97vw);margin-top:16px;background:linear-gradient(180deg,#141917,#0c0f0e);border:1px solid #232b29;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px}
   .radio .rl{font-size:10px;letter-spacing:2px;color:#ff6b3d;text-transform:uppercase;font-weight:800;white-space:nowrap}
@@ -196,6 +214,14 @@
     <div class="mgrid" id="mgrid"></div>
   </div>
 
+  <div class="painel met">
+    <div class="mtit">🔬 RAIO-X DO PROCESSO</div>
+    <div class="px-funil" id="px-funil"></div>
+    <div class="px-tit">RESPOSTA POR TOQUE DA CADÊNCIA (24h)</div>
+    <div id="px-toques"></div>
+    <div class="px-mini" id="px-mini"></div>
+  </div>
+
   <div class="radio">
     <span class="rl">📻 Rádio</span>
     <button class="mic" id="mic" onclick="gravar()" title="segura não — só clica, fala e clica de novo">🎙️</button>
@@ -249,7 +275,36 @@ async function entrar(){var email=(document.getElementById('email').value||'').t
 function sair(){localStorage.removeItem('smile_tok');localStorage.removeItem('smile_rt');location.reload()}
 function _tokH(){var ls=localStorage.getItem('smile_tok');if(ls)return ls;try{var m=/tok=([^&]*)/.exec(location.hash||'');if(m&&m[1]){var t=decodeURIComponent(m[1]);if(t){localStorage.setItem('smile_tok',t);var r=/rt=([^&]*)/.exec(location.hash||'');if(r&&r[1])localStorage.setItem('smile_rt',decodeURIComponent(r[1]));return t}}}catch(e){}return localStorage.getItem('smile_tok')}
 
-function ligado(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');carrega();if(timer)clearInterval(timer);timer=setInterval(carrega,10000)}
+function ligado(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');carrega();carregaProcesso();if(timer)clearInterval(timer);timer=setInterval(carrega,10000)}
+
+// ===== RAIO-X DO PROCESSO (carrega 1x ao abrir — é conta pesada no servidor) =====
+var NOME_TOQUE={ligacao:'📞 ligação',video:'🎬 vídeo',audio:'🎧 áudio',texto:'💬 texto',raiox:'📸 raio-x @',analise:'📊 análise',visita_oculta:'🕵️ visita oculta',despedida:'👋 despedida'};
+async function carregaProcesso(){
+  try{
+    var p=await api('processo');
+    if(!p||!p.ok)return;
+    var a=p.alcance;
+    function et(num,rot,sub,alerta){return '<div class="px-et'+(alerta?' alerta':'')+'"><b>'+num+'</b><span>'+rot+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</div>'}
+    var pc=function(x,y){return y?Math.round(100*x/y)+'%':'—'};
+    document.getElementById('px-funil').innerHTML=
+      et(a.base,'na base','')+'<span class="px-seta">→</span>'+
+      et(a.abordados,'falamos',pc(a.abordados,a.base))+'<span class="px-seta">→</span>'+
+      et(a.responderam,'responderam',pc(a.responderam,a.abordados))+'<span class="px-seta">·</span>'+
+      et(a.nunca_abordados,'nunca abordados','estoque parado',a.nunca_abordados>50);
+    var h='';
+    (p.toques||[]).forEach(function(t){
+      var fraco=t.taxa<15;
+      h+='<div class="px-toque'+(fraco?' fraco':'')+'"><div class="rot">'+t.ordem+'. '+(NOME_TOQUE[t.acao]||t.acao)+'</div>'+
+         '<div class="trilho"><div class="barra" style="width:'+Math.max(t.taxa*2.4,2)+'%"></div></div>'+
+         '<div class="val">'+t.taxa+'% ('+t.resp+'/'+t.feitos+')</div></div>';
+    });
+    document.getElementById('px-toques').innerHTML=h;
+    document.getElementById('px-mini').innerHTML=
+      '<span>🔄 reativados por toque: <b>'+p.reativacao.leads+'</b></span>'+
+      '<span>😅 resgates: <b>'+p.resgates.enviados+'</b> → voltaram <b>'+p.resgates.voltaram+'</b></span>'+
+      '<span>📸 @ coletados: <b>'+p.instagram.com_arroba+'</b> · análises: <b>'+p.instagram.analises_disparadas+'</b></span>';
+  }catch(_){}
+}
 
 function pintaChave(m,on){var el=document.getElementById('m-'+m);if(!el)return;
   el.className='mod '+(on?'ligada':'desligada');
